@@ -38,10 +38,18 @@ export const Login = () => {
             <FontAwesomeIcon className="me-1" icon={faStar} />
             Opção recomendada
           </h3>
-          <Button className="w-full h-12" variant="outline">
+          <Button
+            className="w-full h-12 hover:cursor-pointer"
+            variant="outline"
+          >
             <FontAwesomeIcon className="text-blue-500" icon={faGoogle} />
             Continuar com Google
           </Button>
+        </div>
+        <div className="flex items-center gap-2 my-2">
+          <hr className="flex-1" />
+          <span className="text-sm text-muted-foreground">ou</span>
+          <hr className="flex-1" />
         </div>
         <form onSubmit={handleSubmit(apiLogin)}>
           <FieldGroup>
@@ -84,12 +92,6 @@ export const Login = () => {
             Entrar com email
           </Button>
         </form>
-        <div className="flex gap-3 justify-center">
-          <Button variant="link" className="bg-purple-300 text-purple-700">
-            Admistrador
-          </Button>
-          <Button>Vendedor</Button>
-        </div>
       </Card>
     </div>
   )
