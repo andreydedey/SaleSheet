@@ -21,6 +21,7 @@ export const Login = () => {
   })
 
   const apiLogin = (data: z.infer<typeof loginSchema>) => {
+    console.log("Você está muito linda prima!")
     console.log(data)
   }
 
@@ -34,12 +35,12 @@ export const Login = () => {
           </CardDescription>
         </CardHeader>
         <div className="flex flex-col items-center gap-2">
-          <h3 className="text-green-600 text-sm">
+          <h3 className="text-green-600 text-sm mb-2">
             <FontAwesomeIcon className="me-1" icon={faStar} />
             Opção recomendada
           </h3>
           <Button
-            className="w-full h-12 hover:cursor-pointer"
+            className="w-full h-12 hover:cursor-pointer shadow-sm"
             variant="outline"
           >
             <FontAwesomeIcon className="text-blue-500" icon={faGoogle} />

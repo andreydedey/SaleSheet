@@ -3,11 +3,7 @@ import { useAuth } from "./context/AuthContext"
 import SignUp from "./pages/SignUp"
 import Dashboard from "./pages/Dashboard"
 import { Login } from "./pages/Login"
-
-function ProtectedRoute() {
-  const { user } = useAuth()
-  return user ? <Outlet /> : <Navigate to="/login" replace />
-}
+import { SidebarLayout } from "./layout/AppSidebarLayout"
 
 function PublicRoute() {
   const { user } = useAuth()
@@ -22,8 +18,9 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
         </Route>
-        <Route element={<ProtectedRoute />}>
+        <Route element={<SidebarLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/spreadsheets" element={<div>Planilhas</div>} />
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
