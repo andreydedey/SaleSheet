@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-export default function Dashboard() {
+export const Dashboard = () => {
   const salesPersons = [
     {
       name: "Jhenifer",

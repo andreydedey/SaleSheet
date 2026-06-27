@@ -1,9 +1,10 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router"
 import { useAuth } from "./context/AuthContext"
 import SignUp from "./pages/SignUp"
-import Dashboard from "./pages/Dashboard"
+import { Dashboard } from "./pages/Dashboard"
 import { Login } from "./pages/Login"
 import { SidebarLayout } from "./layout/AppSidebarLayout"
+import { SpreadSheet } from "./pages/SpreadSheet"
 
 function PublicRoute() {
   const { user } = useAuth()
@@ -20,7 +21,7 @@ export default function App() {
         </Route>
         <Route element={<SidebarLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/spreadsheets" element={<div>Planilhas</div>} />
+          <Route path="/spreadsheets" element={<SpreadSheet />} />
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>

@@ -6,7 +6,7 @@ export const SidebarLayout = () => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main>
+      <main className="flex-1">
         <SidebarTrigger />
         <div className="flex-1 px-6">
           <Outlet />
