@@ -4,6 +4,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+const mockSpreadsheets = [
+  { id: "PLN-010", revendedora: "Ana Silva", emitidaEm: "Jan 2026", pecas: 20, vendidas: 6, emAberto: 14, totalVendido: 540.0, status: "Inativa" },
+  { id: "PLN-007", revendedora: "Carla Mendes", emitidaEm: "Fev 2026", pecas: 35, vendidas: 35, emAberto: 0, totalVendido: 1820.0, status: "Inativa" },
+  { id: "PLN-004", revendedora: "Jhenifer Trindade", emitidaEm: "Mar 2026", pecas: 15, vendidas: 10, emAberto: 5, totalVendido: 870.5, status: "Inativa" },
+]
 
 export const SpreadSheet = () => {
   return (
@@ -63,6 +72,61 @@ export const SpreadSheet = () => {
         </span>
         <hr className="flex-1" />
       </div>
+      <Card className="ring-0 border border-b-0 rounded-b-none">
+        <CardHeader className="flex gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="spreadsheet">Planilha</Label>
+            <Input
+              className="w-2xs"
+              id="spreadsheet"
+              type="text"
+              placeholder="Buscar por nome na planilha..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="spreadsheet">Revendedora</Label>
+            <Input
+              id="spreadsheet"
+              type="text"
+              placeholder="Todas as revendedoras"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="spreadsheet">Status</Label>
+            <Input id="spreadsheet" type="text" placeholder="Todos os Status" />
+          </div>
+        </CardHeader>
+      </Card>
+      <Table className="ring-0 border border-t">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Planilha</TableHead>
+            <TableHead>Revendedora</TableHead>
+            <TableHead>Emitida em</TableHead>
+            <TableHead>Peças</TableHead>
+            <TableHead>Vendidas</TableHead>
+            <TableHead>Em aberto</TableHead>
+            <TableHead>Total Vendido</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {mockSpreadsheets.map((s) => (
+            <TableRow key={s.id}>
+              <TableCell className="font-medium">{s.id}</TableCell>
+              <TableCell>{s.revendedora}</TableCell>
+              <TableCell>{s.emitidaEm}</TableCell>
+              <TableCell>{s.pecas}</TableCell>
+              <TableCell className="text-green-600 font-semibold">{s.vendidas}</TableCell>
+              <TableCell className="text-red-500 font-semibold">{s.emAberto}</TableCell>
+              <TableCell>R$ {s.totalVendido.toFixed(2)}</TableCell>
+              <TableCell>
+                <Badge className="bg-gray-100 text-gray-600 font-semibold">{s.status}</Badge>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </>
   )
 }
