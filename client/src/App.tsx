@@ -5,6 +5,7 @@ import { Dashboard } from "./pages/Dashboard"
 import { Login } from "./pages/Login"
 import { SidebarLayout } from "./layout/AppSidebarLayout"
 import { SpreadSheet } from "./pages/SpreadSheet"
+import { SpreadSheetEditor } from "./pages/SpreadSheetEditor"
 
 function PublicRoute() {
   const { user } = useAuth()
@@ -22,6 +23,7 @@ export default function App() {
         <Route element={<SidebarLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/spreadsheets" element={<SpreadSheet />} />
+          <Route path="/spreadsheets/editor" element={<SpreadSheetEditor />} />
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>

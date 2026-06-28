@@ -1,17 +1,52 @@
-import { Button } from "@/components/ui/button"
-import { faPlusSquare } from "@fortawesome/free-regular-svg-icons/faPlusSquare"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { faPlusSquare } from "@fortawesome/free-regular-svg-icons"
+import { Link } from "react-router"
 
 const mockSpreadsheets = [
-  { id: "PLN-010", revendedora: "Ana Silva", emitidaEm: "Jan 2026", pecas: 20, vendidas: 6, emAberto: 14, totalVendido: 540.0, status: "Inativa" },
-  { id: "PLN-007", revendedora: "Carla Mendes", emitidaEm: "Fev 2026", pecas: 35, vendidas: 35, emAberto: 0, totalVendido: 1820.0, status: "Inativa" },
-  { id: "PLN-004", revendedora: "Jhenifer Trindade", emitidaEm: "Mar 2026", pecas: 15, vendidas: 10, emAberto: 5, totalVendido: 870.5, status: "Inativa" },
+  {
+    id: "PLN-010",
+    revendedora: "Ana Silva",
+    emitidaEm: "Jan 2026",
+    pecas: 20,
+    vendidas: 6,
+    emAberto: 14,
+    totalVendido: 540.0,
+    status: "Inativa",
+  },
+  {
+    id: "PLN-007",
+    revendedora: "Carla Mendes",
+    emitidaEm: "Fev 2026",
+    pecas: 35,
+    vendidas: 35,
+    emAberto: 0,
+    totalVendido: 1820.0,
+    status: "Inativa",
+  },
+  {
+    id: "PLN-004",
+    revendedora: "Jhenifer Trindade",
+    emitidaEm: "Mar 2026",
+    pecas: 15,
+    vendidas: 10,
+    emAberto: 5,
+    totalVendido: 870.5,
+    status: "Inativa",
+  },
 ]
 
 export const SpreadSheet = () => {
@@ -24,9 +59,11 @@ export const SpreadSheet = () => {
             Gerencie todas as planilhas das revendedoras
           </h3>
         </div>
-        <Button size="lg">
-          <FontAwesomeIcon icon={faPlusSquare} />
-          Nova Planilha
+        <Button asChild size="lg">
+          <Link to={"editor"}>
+            <FontAwesomeIcon icon={faPlusSquare} />
+            Nova Planilha
+          </Link>
         </Button>
       </div>
       <div className="flex gap-2 items-center mb-3">
@@ -117,11 +154,17 @@ export const SpreadSheet = () => {
               <TableCell>{s.revendedora}</TableCell>
               <TableCell>{s.emitidaEm}</TableCell>
               <TableCell>{s.pecas}</TableCell>
-              <TableCell className="text-green-600 font-semibold">{s.vendidas}</TableCell>
-              <TableCell className="text-red-500 font-semibold">{s.emAberto}</TableCell>
+              <TableCell className="text-green-600 font-semibold">
+                {s.vendidas}
+              </TableCell>
+              <TableCell className="text-red-500 font-semibold">
+                {s.emAberto}
+              </TableCell>
               <TableCell>R$ {s.totalVendido.toFixed(2)}</TableCell>
               <TableCell>
-                <Badge className="bg-gray-100 text-gray-600 font-semibold">{s.status}</Badge>
+                <Badge className="bg-gray-100 text-gray-600 font-semibold">
+                  {s.status}
+                </Badge>
               </TableCell>
             </TableRow>
           ))}
