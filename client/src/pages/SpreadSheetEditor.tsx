@@ -1,3 +1,4 @@
+import { AddProductDialog } from "@/components/AddProductDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -61,8 +62,10 @@ export const SpreadSheetEditor = () => {
       <div>
         <Card className="ring-0 border border-b-0 rounded-b-none">
           <CardHeader className="flex justify-between">
-            <div className="space-y-2">
-              <h4 className="text-base font-semibold">Revendedor</h4>
+            <h4 className="text-base font-semibold">Produtos</h4>
+            <div className="space-x-2">
+              <Badge variant="secondary">3 produtos</Badge>
+              <AddProductDialog />
             </div>
           </CardHeader>
         </Card>
