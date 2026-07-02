@@ -131,6 +131,44 @@ export const SpreadSheetEditor = () => {
                 <TableCell>{item.referencia}</TableCell>
                 <TableCell>{item.definicao}</TableCell>
                 <TableCell>R$ {item.valor.toFixed(2)}</TableCell>
+                <TableCell>{item.vendido ? "Sim" : "Não"}</TableCell>
+                <TableCell>
+                  <Badge
+                    className={
+                      item.vendido
+                        ? "bg-green-50 text-green-700 hover:bg-green-50"
+                        : "bg-red-50 text-red-700 hover:bg-red-50"
+                    }
+                  >
+                    {item.vendido ? "Vendido" : "Em aberto"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {item.observacao && (
+                    <Popover>
+                      <PopoverTrigger>
+                        <FontAwesomeIcon
+                          className="text-green-600"
+                          icon={faMessage}
+                        />
+                      </PopoverTrigger>
+                      <PopoverContent className=" max-w-52">
+                        <PopoverTitle>
+                          <FontAwesomeIcon
+                            className="text-green-600 mr-1.5"
+                            icon={faMessage}
+                          />
+                          Observação:
+                        </PopoverTitle>
+                        <hr />
+                        {item.observacao}
+                        <PopoverDescription className="text-xs">
+                          {item.referencia} · {item.definicao}
+                        </PopoverDescription>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </TableCell>
                 <TableCell className="space-x-2 text-base w-px whitespace-nowrap">
                   <FontAwesomeIcon
                     className="text-blue-500 hover:cursor-pointer"
