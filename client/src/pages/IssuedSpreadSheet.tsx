@@ -1,4 +1,3 @@
-import { AddProductDialog } from "@/components/AddProductDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -20,10 +19,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  faCircleCheck,
+  faCircleXmark,
   faEdit,
   faMessage,
   faTrashCan,
 } from "@fortawesome/free-regular-svg-icons"
+import { faBoxOpen, faDollarSign } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 const mockItems = [
@@ -69,42 +71,70 @@ const mockItems = [
   },
 ]
 
-export const SpreadSheetEditor = () => {
+export const IssuedSpreadSheet = () => {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between">
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
-            <h1 className="text-2xl font-bold">Nova Planilha</h1>
+            <h1 className="text-2xl font-bold">Planilha - Ana Silva</h1>
             <Badge className="bg-yellow-50 text-yellow-700 hover:bg-yellow-50">
               Rascunho
             </Badge>
           </div>
           <h3 className="text-muted-foreground text-[14px]">
-            Criada em 18/06/2026 · não emitida
+            Emitida em 18/19/2026 · 18 peças
           </h3>
         </div>
         <Button size="lg">Emitir Planilha</Button>
       </div>
-      <Card className="py-6">
-        <CardContent className="flex justify-between">
-          <div className="space-y-1">
-            <p>Revendedora</p>
-            <p>
-              A planilha ficará visível para a revendedora somente após ser
-              emitida
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="salesperson">Revendedor</Label>
-            <Input
-              className="w-2xs"
-              id="salesperson"
-              placeholder="Seleciona o revendedor"
+      <div className="flex gap-4 *:flex-1">
+        <Card>
+          <CardContent className="flex items-center gap-4">
+            <FontAwesomeIcon className="text-xl" icon={faBoxOpen} />
+            <div>
+              <p className="text-muted-foreground text-xs">Total de peças</p>
+              <p className="text-foreground text-xl">18</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4">
+            <FontAwesomeIcon
+              className="text-green-500 text-xl"
+              icon={faCircleCheck}
             />
-          </div>
-        </CardContent>
-      </Card>
+            <div>
+              <p className="text-muted-foreground text-xs">Total de peças</p>
+              <p className="text-foreground text-xl">18</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4">
+            <FontAwesomeIcon
+              className="text-red-500 text-xl"
+              icon={faCircleXmark}
+            />
+            <div>
+              <p className="text-muted-foreground text-xs">Total de peças</p>
+              <p className="text-foreground text-xl">18</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4">
+            <FontAwesomeIcon
+              className="text-violet-500 text-xl"
+              icon={faDollarSign}
+            />
+            <div>
+              <p className="text-muted-foreground text-xs">Total de peças</p>
+              <p className="text-foreground text-xl">18</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       <div>
         <Card className="ring-0 border border-b-0 rounded-b-none">
           <CardHeader className="flex justify-between">
@@ -121,6 +151,9 @@ export const SpreadSheetEditor = () => {
               <TableHead>Referência</TableHead>
               <TableHead>Definição</TableHead>
               <TableHead>Valor</TableHead>
+              <TableHead>Vendido</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Observação</TableHead>
               <TableHead className="w-24"></TableHead>
             </TableRow>
           </TableHeader>

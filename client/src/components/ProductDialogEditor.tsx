@@ -15,7 +15,13 @@ import { Field, FieldGroup, FieldLabel } from "./ui/field"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "./ui/input"
 
-export const AddProductDialog = () => {
+interface ProductDialogEditorProps {
+  productId?: number
+}
+
+export const ProductDialogEditor: React.FC<ProductDialogEditorProps> = ({
+  productId,
+}) => {
   const { form, control } = useForm()
 
   return (
@@ -31,11 +37,9 @@ export const AddProductDialog = () => {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Adicionar Produto</DialogTitle>
-          <DialogDescription>
-            Adicione um novo produto à planilha. O número é gerado
-            automaticamente.
-          </DialogDescription>
+          <DialogTitle>
+            {productId ? "Editar produto" : "Adicionar Produto"}
+          </DialogTitle>
         </DialogHeader>
         <form action="">
           <FieldGroup>

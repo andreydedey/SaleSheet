@@ -1,16 +1,7 @@
-import { AddProductDialog } from "@/components/AddProductDialog"
+import { ProductDialogEditor } from "@/components/ProductDialogEditor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import {
   Table,
   TableBody,
@@ -19,11 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  faEdit,
-  faMessage,
-  faTrashCan,
-} from "@fortawesome/free-regular-svg-icons"
+import { faXbox } from "@fortawesome/free-brands-svg-icons"
+import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 const mockItems = [
@@ -76,9 +64,6 @@ export const SpreadSheetEditor = () => {
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
             <h1 className="text-2xl font-bold">Nova Planilha</h1>
-            <Badge className="bg-yellow-50 text-yellow-700 hover:bg-yellow-50">
-              Rascunho
-            </Badge>
           </div>
           <h3 className="text-muted-foreground text-[14px]">
             Criada em 18/06/2026 · não emitida
@@ -86,23 +71,10 @@ export const SpreadSheetEditor = () => {
         </div>
         <Button size="lg">Emitir Planilha</Button>
       </div>
-      <Card className="py-6">
-        <CardContent className="flex justify-between">
-          <div className="space-y-1">
-            <p>Revendedora</p>
-            <p>
-              A planilha ficará visível para a revendedora somente após ser
-              emitida
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="salesperson">Revendedor</Label>
-            <Input
-              className="w-2xs"
-              id="salesperson"
-              placeholder="Seleciona o revendedor"
-            />
-          </div>
+      <Card>
+        <CardContent className="flex items-center gap-2">
+          <FontAwesomeIcon icon={faXbox} />
+          <p className="text-muted-foreground">Total de peças</p>
         </CardContent>
       </Card>
       <div>
@@ -111,6 +83,7 @@ export const SpreadSheetEditor = () => {
             <h4 className="text-base font-semibold">Produtos</h4>
             <div className="space-x-2">
               <Badge variant="secondary">3 produtos</Badge>
+              <ProductDialogEditor />
             </div>
           </CardHeader>
         </Card>
