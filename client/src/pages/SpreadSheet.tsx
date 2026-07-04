@@ -104,9 +104,7 @@ export const SpreadSheet = () => {
       </div>
       <div className="flex items-center gap-3 my-4">
         <hr className="flex-1" />
-        <span className="text-sm text-muted-foreground">
-          Planilhas Inativas
-        </span>
+        <span className="text-sm text-muted-foreground">Planilhas</span>
         <hr className="flex-1" />
       </div>
       <Card className="ring-0 border border-b-0 rounded-b-none">

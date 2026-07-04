@@ -16,6 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { faPlus } from "@fortawesome/free-solid-svg-icons"
 
 export const Dashboard = () => {
   const salesPersons = [
@@ -61,7 +63,13 @@ export const Dashboard = () => {
       </div>
       <div>
         <Card className="ring-0 border border-b-0 rounded-b-none">
-          <CardHeader>Revendedoras</CardHeader>
+          <CardHeader className="flex justify-between items-center">
+            <p className="font-bold">Revendedoras</p>
+            <Button size="lg">
+              <FontAwesomeIcon icon={faPlus} />
+              Convidar Revendedora
+            </Button>
+          </CardHeader>
         </Card>
         <Table className="ring-0 border border-t">
           <TableHeader>

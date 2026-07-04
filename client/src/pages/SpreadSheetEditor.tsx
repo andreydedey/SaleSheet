@@ -2,6 +2,8 @@ import { ProductDialogEditor } from "@/components/ProductDialogEditor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Table,
   TableBody,
@@ -75,6 +77,25 @@ export const SpreadSheetEditor = () => {
         <CardContent className="flex items-center gap-2">
           <FontAwesomeIcon icon={faXbox} />
           <p className="text-muted-foreground">Total de peças</p>
+        </CardContent>
+      </Card>
+      <Card className="py-6">
+        <CardContent className="flex justify-between">
+          <div className="space-y-1">
+            <p>Revendedora</p>
+            <p>
+              A planilha ficará visível para a revendedora somente após ser
+              emitida
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="salesperson">Revendedor</Label>
+            <Input
+              className="w-2xs"
+              id="salesperson"
+              placeholder="Seleciona o revendedor"
+            />
+          </div>
         </CardContent>
       </Card>
       <div>

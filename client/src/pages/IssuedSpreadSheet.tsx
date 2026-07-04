@@ -1,8 +1,6 @@
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Popover,
   PopoverContent,
@@ -78,15 +76,12 @@ export const IssuedSpreadSheet = () => {
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
             <h1 className="text-2xl font-bold">Planilha - Ana Silva</h1>
-            <Badge className="bg-yellow-50 text-yellow-700 hover:bg-yellow-50">
-              Rascunho
-            </Badge>
+            <Badge className="bg-green-50 text-green-700">Emitida</Badge>
           </div>
           <h3 className="text-muted-foreground text-[14px]">
             Emitida em 18/19/2026 · 18 peças
           </h3>
         </div>
-        <Button size="lg">Emitir Planilha</Button>
       </div>
       <div className="flex gap-4 *:flex-1">
         <Card>
@@ -94,7 +89,7 @@ export const IssuedSpreadSheet = () => {
             <FontAwesomeIcon className="text-xl" icon={faBoxOpen} />
             <div>
               <p className="text-muted-foreground text-xs">Total de peças</p>
-              <p className="text-foreground text-xl">18</p>
+              <p className="text-foreground text-xl font-bold">18</p>
             </div>
           </CardContent>
         </Card>
@@ -105,8 +100,8 @@ export const IssuedSpreadSheet = () => {
               icon={faCircleCheck}
             />
             <div>
-              <p className="text-muted-foreground text-xs">Total de peças</p>
-              <p className="text-foreground text-xl">18</p>
+              <p className="text-muted-foreground text-xs">Vendidas</p>
+              <p className="text-foreground text-xl font-bold">18</p>
             </div>
           </CardContent>
         </Card>
@@ -117,8 +112,8 @@ export const IssuedSpreadSheet = () => {
               icon={faCircleXmark}
             />
             <div>
-              <p className="text-muted-foreground text-xs">Total de peças</p>
-              <p className="text-foreground text-xl">18</p>
+              <p className="text-muted-foreground text-xs">Não vendidas</p>
+              <p className="text-foreground text-xl font-bold">7</p>
             </div>
           </CardContent>
         </Card>
@@ -129,8 +124,8 @@ export const IssuedSpreadSheet = () => {
               icon={faDollarSign}
             />
             <div>
-              <p className="text-muted-foreground text-xs">Total de peças</p>
-              <p className="text-foreground text-xl">18</p>
+              <p className="text-muted-foreground text-xs">Total Vendido</p>
+              <p className="text-foreground text-xl font-bold">R$ 6.270</p>
             </div>
           </CardContent>
         </Card>
@@ -164,7 +159,12 @@ export const IssuedSpreadSheet = () => {
                 <TableCell>{item.referencia}</TableCell>
                 <TableCell>{item.definicao}</TableCell>
                 <TableCell>R$ {item.valor.toFixed(2)}</TableCell>
-                <TableCell>{item.vendido ? "Sim" : "Não"}</TableCell>
+                <TableCell>
+                  <Checkbox
+                    defaultChecked={item.vendido}
+                    onCheckedChange={(check) => console.log(check)}
+                  />
+                </TableCell>
                 <TableCell>
                   <Badge
                     className={
