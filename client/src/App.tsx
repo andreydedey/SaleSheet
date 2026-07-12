@@ -1,12 +1,15 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router"
 import { useAuth } from "./context/AuthContext"
-import SignUp from "./pages/SignUp"
-import { Dashboard } from "./pages/Dashboard"
-import { Login } from "./pages/Login"
+import SignUp from "./pages/Admin/SignUp"
+import { Dashboard } from "./pages/Admin/Dashboard"
+import { Login } from "./pages/Admin/Login"
 import { SidebarLayout } from "./layout/AppSidebarLayout"
-import { SpreadSheet } from "./pages/SpreadSheet"
-import { SpreadSheetEditor } from "./pages/SpreadSheetEditor"
-import { IssuedSpreadSheet } from "./pages/IssuedSpreadSheet"
+import { SpreadSheet } from "./pages/Admin/SpreadSheet"
+import { SpreadSheetEditor } from "./pages/Admin/SpreadSheetEditor"
+import { IssuedSpreadSheet } from "./pages/Admin/IssuedSpreadSheet"
+import { SalespersonLayout } from "./layout/SalespersonLayout"
+import { Home } from "./pages/Salesperson/Home"
+import { SpreadSheets } from "./pages/Salesperson/SpreadSheets"
 
 function PublicRoute() {
   const { user } = useAuth()
@@ -31,6 +34,10 @@ export default function App() {
           />
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/salesperson" element={<SalespersonLayout />}>
+          <Route path="home" element={<Home />} />
+          <Route path="spreadsheets" element={<SpreadSheets />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
