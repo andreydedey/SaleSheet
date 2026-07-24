@@ -73,16 +73,10 @@ export const SpreadSheetEditor = () => {
         </div>
         <Button size="lg">Emitir Planilha</Button>
       </div>
-      <Card>
-        <CardContent className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faXbox} />
-          <p className="text-muted-foreground">Total de peças</p>
-        </CardContent>
-      </Card>
       <Card className="py-6">
         <CardContent className="flex justify-between">
           <div className="space-y-1">
-            <p>Revendedora</p>
+            <p className="font-semibold text-lg">Escolha o Revendedor</p>
             <p>
               A planilha ficará visível para a revendedora somente após ser
               emitida

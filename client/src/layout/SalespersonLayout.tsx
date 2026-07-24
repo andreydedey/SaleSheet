@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from "react-router"
+import { Outlet } from "react-router"
+import { MobileTabBar } from "@/components/MobileTabBar"
 
 export function SalespersonLayout() {
   return (
@@ -7,28 +8,13 @@ export function SalespersonLayout() {
         <span className="font-semibold text-base">SaleSheet</span>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4">
+      <main className="flex-1 overflow-y-auto p-4 pb-24">
         <Outlet />
       </main>
 
-      <nav className="shrink-0 h-16 flex items-center justify-around border-t bg-background pb-[env(safe-area-inset-bottom)]">
-        <NavLink
-          to="/salesperson/home"
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-0.5 text-xs ${isActive ? "text-primary" : "text-muted-foreground"}`
-          }
-        >
-          <span>Home</span>
-        </NavLink>
-        <NavLink
-          to="/salesperson/spreadsheets"
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-0.5 text-xs ${isActive ? "text-primary" : "text-muted-foreground"}`
-          }
-        >
-          <span>Spreadsheets</span>
-        </NavLink>
-      </nav>
+      <footer className="fixed bottom-0 inset-x-0 flex justify-center pb-[env(safe-area-inset-bottom)]">
+        <MobileTabBar />
+      </footer>
     </div>
   )
 }

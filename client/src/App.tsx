@@ -9,7 +9,7 @@ import { SpreadSheetEditor } from "./pages/Admin/SpreadSheetEditor"
 import { IssuedSpreadSheet } from "./pages/Admin/IssuedSpreadSheet"
 import { SalespersonLayout } from "./layout/SalespersonLayout"
 import { Home } from "./pages/Salesperson/Home"
-import { SpreadSheets } from "./pages/Salesperson/SpreadSheets"
+import { SalesPersonSpreadSheets } from "./pages/Salesperson/SalesPersonSpreadSheet"
 
 function PublicRoute() {
   const { user } = useAuth()
@@ -36,7 +36,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/salesperson" element={<SalespersonLayout />}>
           <Route path="home" element={<Home />} />
-          <Route path="spreadsheets" element={<SpreadSheets />} />
+          <Route path="spreadsheets" element={<SalesPersonSpreadSheets />} />
         </Route>
       </Routes>
     </BrowserRouter>

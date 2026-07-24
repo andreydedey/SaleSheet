@@ -7,7 +7,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers"
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons/faDollarSign"
-import { faTable } from "@fortawesome/free-solid-svg-icons/faTAble"
+import { faTable } from "@fortawesome/free-solid-svg-icons/faTable"
 import {
   Table,
   TableBody,
