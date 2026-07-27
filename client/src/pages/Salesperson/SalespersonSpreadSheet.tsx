@@ -65,7 +65,7 @@ const mockItems: Item[] = [
 const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 
-export const SalesPersonSpreadSheets = () => {
+export const SalespersonSpreadSheet = () => {
   const navigate = useNavigate()
   const [items, setItems] = useState(mockItems)
 
@@ -133,7 +133,7 @@ export const SalesPersonSpreadSheets = () => {
         >
           <CardContent className="flex justify-between">
             <div className="space-y-2">
-              <p className="text-[12px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {item.reference}
               </p>
               <p className="text-sm text-foreground font-medium">{item.name}</p>
