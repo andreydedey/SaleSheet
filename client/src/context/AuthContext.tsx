@@ -1,29 +1,36 @@
 import { createContext, useContext, useState } from "react"
-
-type User = { token: string }
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query"
+import api from "@lib/api"
+import type { User } from "@/types/User"
 
 type AuthContextType = {
   user: User | null
-  login: (token: string) => void
+  loading: boolean
+  login: () => void
   logout: () => void
 }
 
 const AuthContext = createContext<AuthContextType>(null!)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const token = localStorage.getItem("token")
-    return token ? { token } : null
+  const queryClient = useQueryClient()
+
+  const {} = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.get<User>("/api/me").then((res) => res.data),
+    retry: false,
+    staleTime: Infinity,
   })
 
-  const login = (token: string) => {
-    localStorage.setItem("token", token)
-    setUser({ token })
+  const login = () => {
+    window.location.href = "http://localhost:8080"
   }
 
   const logout = () => {
-    localStorage.removeItem("token")
-    setUser(null)
+    api.post("api/logout").then(() => {
+      queryClient.clear()
+      window.location.href = "/login"
+    })
   }
 
   return (
