@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react"
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query"
-import api from "@lib/api"
 import type { User } from "@/types/User"
+import { api } from "@/lib/api"
 
 type AuthContextType = {
   user: User | null
@@ -15,7 +15,7 @@ const AuthContext = createContext<AuthContextType>(null!)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient()
 
-  const {} = useQuery({
+  const { data: user = null, isLoading: loading } = useQuery({
     queryKey: ["me"],
     queryFn: () => api.get<User>("/api/me").then((res) => res.data),
     retry: false,
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )

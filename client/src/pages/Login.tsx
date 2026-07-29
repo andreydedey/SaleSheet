@@ -14,8 +14,11 @@ import type z from "zod"
 import { loginSchema } from "@/schemas/loginSchema"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "@/context/AuthContext"
 
 export const Login = () => {
+  const { login } = useAuth()
+
   const { handleSubmit, control } = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
   })
@@ -42,6 +45,7 @@ export const Login = () => {
           <Button
             className="w-full h-12 hover:cursor-pointer shadow-sm"
             variant="outline"
+            onClick={login}
           >
             <FontAwesomeIcon className="text-blue-500" icon={faGoogle} />
             Continuar com Google
