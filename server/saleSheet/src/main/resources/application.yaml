@@ -1,9 +1,9 @@
+server:
+  servlet:
+    context-path: /api
 spring:
   application:
     name: saleSheet
-  mvc:
-    servlet:
-      path: /api
   security:
     oauth2:
       client:
