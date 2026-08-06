@@ -1,0 +1,5 @@
+#!/bin/sh
+set -a
+. ./src/main/resources/.env
+set +a
+./mvnw spring-boot:run

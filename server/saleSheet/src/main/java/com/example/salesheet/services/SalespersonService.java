@@ -1,0 +1,32 @@
+package com.example.salesheet.services;
+
+import com.example.salesheet.dto.SalespersonStatsDTO;
+import com.example.salesheet.entities.SpreadSheet;
+import com.example.salesheet.enums.SpreadSheetStatus;
+import com.example.salesheet.repositories.SpreadsheetRepository;
+import com.example.salesheet.specifications.SpreadSheetSpecifications;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class SalespersonService {
+
+    private final SpreadsheetRepository spreadsheetRepository;
+
+    public SalespersonStatsDTO getStats(UUID userId) {
+        var spec = SpreadSheetSpecifications.hasUser(userId)
+                .and(SpreadSheetSpecifications.isNotDraft());
+
+        var spreadsheets = spreadsheetRepository.findAllAsListDTO(spec, Pageable.unpaged());
+
+        int totalPieces = spreadsheets.getContent().stream().mapToInt(s -> s.getTotalPieces()).sum();
+        int totalSoldPieces = spreadsheets.getContent().stream().mapToInt(s -> s.getSoldPieces()).sum();
+        long totalSold = 0; // Price sum would need a separate query
+
+        return new SalespersonStatsDTO(totalSold, totalPieces, totalSoldPieces, spreadsheets.getContent().size());
+    }
+}
