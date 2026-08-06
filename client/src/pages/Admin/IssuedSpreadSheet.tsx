@@ -25,61 +25,65 @@ import {
 } from "@fortawesome/free-regular-svg-icons"
 import { faBoxOpen, faDollarSign } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-
-const mockItems = [
-  {
-    id: 1,
-    referencia: "REF-001",
-    definicao: "Blusa Floral",
-    valor: 89.9,
-    vendido: true,
-    observacao: "",
-  },
-  {
-    id: 2,
-    referencia: "REF-002",
-    definicao: "Calça Jeans Slim",
-    valor: 149.9,
-    vendido: false,
-    observacao: "Cliente pediu troca de tamanho",
-  },
-  {
-    id: 3,
-    referencia: "REF-003",
-    definicao: "Vestido Midi",
-    valor: 199.9,
-    vendido: true,
-    observacao: "",
-  },
-  {
-    id: 4,
-    referencia: "REF-004",
-    definicao: "Saia Plissada",
-    valor: 119.9,
-    vendido: false,
-    observacao: "",
-  },
-  {
-    id: 5,
-    referencia: "REF-005",
-    definicao: "Conjunto Linho",
-    valor: 259.9,
-    vendido: true,
-    observacao: "Aguardando pagamento",
-  },
-]
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useParams } from "react-router"
+import { getSpreadsheet } from "@/lib/api/spreadsheets"
+import { listProducts, markSold, deleteProduct } from "@/lib/api/products"
 
 export const IssuedSpreadSheet = () => {
+  const { id } = useParams<{ id: string }>()
+  const spreadsheetId = Number(id)
+  const queryClient = useQueryClient()
+
+  const { data: spreadsheet } = useQuery({
+    queryKey: ["spreadsheet", spreadsheetId],
+    queryFn: () => getSpreadsheet(spreadsheetId),
+  })
+
+  const { data: productsPage } = useQuery({
+    queryKey: ["products", spreadsheetId],
+    queryFn: () => listProducts(spreadsheetId, 0, 100),
+  })
+
+  const markSoldMutation = useMutation({
+    mutationFn: ({ itemId, sold }: { itemId: number; sold: boolean }) =>
+      markSold(spreadsheetId, itemId, sold),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (itemId: number) => deleteProduct(spreadsheetId, itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+    },
+  })
+
+  const products = productsPage?.content ?? []
+  const totalPieces = products.length
+  const soldPieces = products.filter((p) => p.sold).length
+  const unsoldPieces = totalPieces - soldPieces
+  const totalSold = products
+    .filter((p) => p.sold)
+    .reduce((sum, p) => sum + p.price, 0)
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between">
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
-            <h1 className="text-2xl font-bold">Planilha - Ana Silva</h1>
+            <h1 className="text-2xl font-bold">
+              Planilha - {spreadsheet?.name}
+            </h1>
             <Badge className="bg-green-50 text-green-700">Emitida</Badge>
           </div>
           <h3 className="text-muted-foreground text-[14px]">
-            Emitida em 18/19/2026 · 18 peças
+            Emitida em{" "}
+            {spreadsheet?.issuedAt
+              ? new Date(spreadsheet.issuedAt).toLocaleDateString("pt-BR")
+              : "-"}{" "}
+            · {totalPieces} peças
           </h3>
         </div>
       </div>
@@ -89,7 +93,7 @@ export const IssuedSpreadSheet = () => {
             <FontAwesomeIcon className="text-xl" icon={faBoxOpen} />
             <div>
               <p className="text-muted-foreground text-xs">Total de peças</p>
-              <p className="text-foreground text-xl font-bold">18</p>
+              <p className="text-foreground text-xl font-bold">{totalPieces}</p>
             </div>
           </CardContent>
         </Card>
@@ -101,7 +105,7 @@ export const IssuedSpreadSheet = () => {
             />
             <div>
               <p className="text-muted-foreground text-xs">Vendidas</p>
-              <p className="text-foreground text-xl font-bold">18</p>
+              <p className="text-foreground text-xl font-bold">{soldPieces}</p>
             </div>
           </CardContent>
         </Card>
@@ -113,7 +117,9 @@ export const IssuedSpreadSheet = () => {
             />
             <div>
               <p className="text-muted-foreground text-xs">Não vendidas</p>
-              <p className="text-foreground text-xl font-bold">7</p>
+              <p className="text-foreground text-xl font-bold">
+                {unsoldPieces}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -125,7 +131,9 @@ export const IssuedSpreadSheet = () => {
             />
             <div>
               <p className="text-muted-foreground text-xs">Total Vendido</p>
-              <p className="text-foreground text-xl font-bold">R$ 6.270</p>
+              <p className="text-foreground text-xl font-bold">
+                R$ {totalSold.toFixed(2)}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -135,7 +143,7 @@ export const IssuedSpreadSheet = () => {
           <CardHeader className="flex justify-between">
             <h4 className="text-base font-semibold">Produtos</h4>
             <div className="space-x-2">
-              <Badge variant="secondary">3 produtos</Badge>
+              <Badge variant="secondary">{totalPieces} produtos</Badge>
             </div>
           </CardHeader>
         </Card>
@@ -153,31 +161,36 @@ export const IssuedSpreadSheet = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockItems.map((item) => (
+            {products.map((item, index) => (
               <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.id}</TableCell>
-                <TableCell>{item.referencia}</TableCell>
-                <TableCell>{item.definicao}</TableCell>
-                <TableCell>R$ {item.valor.toFixed(2)}</TableCell>
+                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell>{item.reference}</TableCell>
+                <TableCell>{item.definition}</TableCell>
+                <TableCell>R$ {item.price.toFixed(2)}</TableCell>
                 <TableCell>
                   <Checkbox
-                    defaultChecked={item.vendido}
-                    onCheckedChange={(check) => console.log(check)}
+                    checked={item.sold}
+                    onCheckedChange={(checked) =>
+                      markSoldMutation.mutate({
+                        itemId: item.id,
+                        sold: checked === true,
+                      })
+                    }
                   />
                 </TableCell>
                 <TableCell>
                   <Badge
                     className={
-                      item.vendido
+                      item.sold
                         ? "bg-green-50 text-green-700 hover:bg-green-50"
                         : "bg-red-50 text-red-700 hover:bg-red-50"
                     }
                   >
-                    {item.vendido ? "Vendido" : "Em aberto"}
+                    {item.sold ? "Vendido" : "Em aberto"}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {item.observacao && (
+                  {item.observation && (
                     <Popover>
                       <PopoverTrigger>
                         <FontAwesomeIcon
@@ -194,9 +207,9 @@ export const IssuedSpreadSheet = () => {
                           Observação:
                         </PopoverTitle>
                         <hr />
-                        {item.observacao}
+                        {item.observation}
                         <PopoverDescription className="text-xs">
-                          {item.referencia} · {item.definicao}
+                          {item.reference} · {item.definition}
                         </PopoverDescription>
                       </PopoverContent>
                     </Popover>
@@ -210,6 +223,7 @@ export const IssuedSpreadSheet = () => {
                   <FontAwesomeIcon
                     className="text-red-500 hover:cursor-pointer"
                     icon={faTrashCan}
+                    onClick={() => deleteMutation.mutate(item.id)}
                   />
                 </TableCell>
               </TableRow>

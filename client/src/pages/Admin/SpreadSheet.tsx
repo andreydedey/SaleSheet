@@ -12,44 +12,39 @@ import {
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { faPlusSquare } from "@fortawesome/free-regular-svg-icons"
-import { Link } from "react-router"
+import { CreateSpreadSheetDialog } from "@/components/CreateSpreadsheetDialog"
+import { useQuery } from "@tanstack/react-query"
+import { listSpreadsheets } from "@/lib/api/spreadsheets"
+import { useState } from "react"
+import type { SpreadSheetStatus } from "@/types/api"
 
-const mockSpreadsheets = [
-  {
-    id: "PLN-010",
-    revendedora: "Ana Silva",
-    emitidaEm: "Jan 2026",
-    pecas: 20,
-    vendidas: 6,
-    emAberto: 14,
-    totalVendido: 540.0,
-    status: "Inativa",
-  },
-  {
-    id: "PLN-007",
-    revendedora: "Carla Mendes",
-    emitidaEm: "Fev 2026",
-    pecas: 35,
-    vendidas: 35,
-    emAberto: 0,
-    totalVendido: 1820.0,
-    status: "Inativa",
-  },
-  {
-    id: "PLN-004",
-    revendedora: "Jhenifer Trindade",
-    emitidaEm: "Mar 2026",
-    pecas: 15,
-    vendidas: 10,
-    emAberto: 5,
-    totalVendido: 870.5,
-    status: "Inativa",
-  },
-]
+const statusLabel: Record<SpreadSheetStatus, string> = {
+  DRAFT: "Rascunho",
+  ACTIVE: "Ativa",
+  INACTIVE: "Inativa",
+}
+
+const statusStyle: Record<SpreadSheetStatus, string> = {
+  DRAFT: "bg-yellow-100 text-yellow-700",
+  ACTIVE: "bg-green-100 text-green-600",
+  INACTIVE: "bg-gray-100 text-gray-600",
+}
 
 export const SpreadSheet = () => {
+  const [nameFilter, setNameFilter] = useState("")
+
+  const { data: spreadsheetsPage } = useQuery({
+    queryKey: ["spreadsheets", nameFilter],
+    queryFn: () => listSpreadsheets({ name: nameFilter || undefined }),
+  })
+
+  const { data: activePage } = useQuery({
+    queryKey: ["spreadsheets", "active"],
+    queryFn: () => listSpreadsheets({ status: "ACTIVE" }),
+  })
+
+  const activeSpreadsheets = activePage?.content ?? []
+
   return (
     <>
       <div className="flex justify-between mb-4">
@@ -59,12 +54,7 @@ export const SpreadSheet = () => {
             Gerencie todas as planilhas das revendedoras
           </h3>
         </div>
-        <Button asChild size="lg">
-          <Link to={"editor"}>
-            <FontAwesomeIcon icon={faPlusSquare} />
-            Nova Planilha
-          </Link>
-        </Button>
+        <CreateSpreadSheetDialog />
       </div>
       <div className="flex gap-2 items-center mb-3">
         <div>
@@ -75,32 +65,40 @@ export const SpreadSheet = () => {
           <span className="font-semibold text-base">Planilhas Ativas</span>
         </div>
         <Badge className="bg-green-100 text-green-600 font-semibold">
-          3 ativas
+          {activeSpreadsheets.length} ativas
         </Badge>
       </div>
       <div className="flex gap-2">
-        <Card className="min-w-90">
-          <CardHeader className="flex justify-between items-center">
-            <span className="font-medium">PLN-009</span>
-            <Badge className="bg-green-100 text-green-600 font-semibold">
-              Ativa
-            </Badge>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-2 text-[14px]">Ana Silva</p>
-            <p className="text-muted-foreground text-xs mb-2">
-              Emitida em Jun 2026
-            </p>
-            <div className="grid grid-cols-3 grid-rows-2 w-fit">
-              <span className="text-muted-foreground">Peças</span>
-              <span className="text-muted-foreground">Vendidas</span>
-              <span className="text-muted-foreground">Em aberto</span>
-              <span className="text-base font-bold">20</span>
-              <span className="text-base font-bold text-green-500">6</span>
-              <span className="text-base font-bold text-red-500">14</span>
-            </div>
-          </CardContent>
-        </Card>
+        {activeSpreadsheets.map((s) => (
+          <Card key={s.id} className="min-w-90">
+            <CardHeader className="flex justify-between items-center">
+              <span className="font-medium">{s.name}</span>
+              <Badge className="bg-green-100 text-green-600 font-semibold">
+                Ativa
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground text-xs mb-2">
+                Emitida em{" "}
+                {s.issuedAt
+                  ? new Date(s.issuedAt).toLocaleDateString("pt-BR")
+                  : "-"}
+              </p>
+              <div className="grid grid-cols-3 grid-rows-2 w-fit">
+                <span className="text-muted-foreground">Peças</span>
+                <span className="text-muted-foreground">Vendidas</span>
+                <span className="text-muted-foreground">Em aberto</span>
+                <span className="text-base font-bold">{s.totalPieces}</span>
+                <span className="text-base font-bold text-green-500">
+                  {s.soldPieces}
+                </span>
+                <span className="text-base font-bold text-red-500">
+                  {s.totalPieces - s.soldPieces}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
       <div className="flex items-center gap-3 my-4">
         <hr className="flex-1" />
@@ -110,25 +108,15 @@ export const SpreadSheet = () => {
       <Card className="ring-0 border border-b-0 rounded-b-none">
         <CardHeader className="flex gap-3">
           <div className="space-y-2">
-            <Label htmlFor="spreadsheet">Planilha</Label>
+            <Label htmlFor="search-name">Planilha</Label>
             <Input
               className="w-2xs"
-              id="spreadsheet"
+              id="search-name"
               type="text"
               placeholder="Buscar por nome na planilha..."
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="spreadsheet">Revendedora</Label>
-            <Input
-              id="spreadsheet"
-              type="text"
-              placeholder="Todas as revendedoras"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="spreadsheet">Status</Label>
-            <Input id="spreadsheet" type="text" placeholder="Todos os Status" />
           </div>
         </CardHeader>
       </Card>
@@ -136,7 +124,6 @@ export const SpreadSheet = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Planilha</TableHead>
-            <TableHead>Revendedora</TableHead>
             <TableHead>Emitida em</TableHead>
             <TableHead>Peças</TableHead>
             <TableHead>Vendidas</TableHead>
@@ -146,22 +133,40 @@ export const SpreadSheet = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {mockSpreadsheets.map((s) => (
+          {spreadsheetsPage?.content.map((s) => (
             <TableRow key={s.id}>
-              <TableCell className="font-medium">{s.id}</TableCell>
-              <TableCell>{s.revendedora}</TableCell>
-              <TableCell>{s.emitidaEm}</TableCell>
-              <TableCell>{s.pecas}</TableCell>
+              <TableCell className="font-medium">
+                <Link
+                  to={
+                    s.status === "DRAFT"
+                      ? `editor?id=${s.id}`
+                      : `issued/${s.id}`
+                  }
+                  className="hover:underline"
+                >
+                  {s.name}
+                </Link>
+              </TableCell>
+              <TableCell>
+                {s.issuedAt
+                  ? new Date(s.issuedAt).toLocaleDateString("pt-BR")
+                  : "-"}
+              </TableCell>
+              <TableCell>{s.totalPieces}</TableCell>
               <TableCell className="text-green-600 font-semibold">
-                {s.vendidas}
+                {s.soldPieces}
               </TableCell>
               <TableCell className="text-red-500 font-semibold">
-                {s.emAberto}
+                {s.totalPieces - s.soldPieces}
               </TableCell>
-              <TableCell>R$ {s.totalVendido.toFixed(2)}</TableCell>
               <TableCell>
-                <Badge className="bg-gray-100 text-gray-600 font-semibold">
-                  {s.status}
+                R${" "}
+                {/* totalSold is derived in frontend - needs product data */}
+                -
+              </TableCell>
+              <TableCell>
+                <Badge className={`${statusStyle[s.status]} font-semibold`}>
+                  {statusLabel[s.status]}
                 </Badge>
               </TableCell>
             </TableRow>

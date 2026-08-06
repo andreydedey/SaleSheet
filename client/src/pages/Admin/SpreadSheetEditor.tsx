@@ -1,9 +1,7 @@
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Card, CardHeader } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -12,93 +10,79 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { faXbox } from "@fortawesome/free-brands-svg-icons"
 import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-
-const mockItems = [
-  {
-    id: 1,
-    referencia: "REF-001",
-    definicao: "Blusa Floral",
-    valor: 89.9,
-    vendido: true,
-    observacao: "",
-  },
-  {
-    id: 2,
-    referencia: "REF-002",
-    definicao: "Calça Jeans Slim",
-    valor: 149.9,
-    vendido: false,
-    observacao: "Cliente pediu troca de tamanho",
-  },
-  {
-    id: 3,
-    referencia: "REF-003",
-    definicao: "Vestido Midi",
-    valor: 199.9,
-    vendido: true,
-    observacao: "",
-  },
-  {
-    id: 4,
-    referencia: "REF-004",
-    definicao: "Saia Plissada",
-    valor: 119.9,
-    vendido: false,
-    observacao: "",
-  },
-  {
-    id: 5,
-    referencia: "REF-005",
-    definicao: "Conjunto Linho",
-    valor: 259.9,
-    vendido: true,
-    observacao: "Aguardando pagamento",
-  },
-]
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useSearchParams, useNavigate } from "react-router"
+import { getSpreadsheet, emitSpreadsheet } from "@/lib/api/spreadsheets"
+import { listProducts, deleteProduct } from "@/lib/api/products"
 
 export const SpreadSheetEditor = () => {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const spreadsheetId = Number(searchParams.get("id"))
+
+  const { data: spreadsheet } = useQuery({
+    queryKey: ["spreadsheet", spreadsheetId],
+    queryFn: () => getSpreadsheet(spreadsheetId),
+  })
+
+  const { data: productsPage } = useQuery({
+    queryKey: ["products", spreadsheetId],
+    queryFn: () => listProducts(spreadsheetId, 0, 100),
+  })
+
+  const emitMutation = useMutation({
+    mutationFn: () => emitSpreadsheet(spreadsheetId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spreadsheets"] })
+      navigate(`/spreadsheets/issued/${spreadsheetId}`)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (itemId: number) => deleteProduct(spreadsheetId, itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+    },
+  })
+
+  const products = productsPage?.content ?? []
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between">
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
-            <h1 className="text-2xl font-bold">Nova Planilha</h1>
+            <h1 className="text-2xl font-bold">{spreadsheet?.name}</h1>
           </div>
           <h3 className="text-muted-foreground text-[14px]">
-            Criada em 18/06/2026 · não emitida
+            Criada em{" "}
+            {spreadsheet
+              ? new Date(spreadsheet.createdAt).toLocaleDateString("pt-BR")
+              : ""}{" "}
+            · não emitida
           </h3>
         </div>
-        <Button size="lg">Emitir Planilha</Button>
+        <Button size="lg" onClick={() => emitMutation.mutate()}>
+          Emitir Planilha
+        </Button>
       </div>
-      <Card className="py-6">
-        <CardContent className="flex justify-between">
-          <div className="space-y-1">
-            <p className="font-semibold text-lg">Escolha o Revendedor</p>
-            <p>
-              A planilha ficará visível para a revendedora somente após ser
-              emitida
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="salesperson">Revendedor</Label>
-            <Input
-              className="w-2xs"
-              id="salesperson"
-              placeholder="Seleciona o revendedor"
-            />
-          </div>
-        </CardContent>
-      </Card>
       <div>
         <Card className="ring-0 border border-b-0 rounded-b-none">
           <CardHeader className="flex justify-between">
             <h4 className="text-base font-semibold">Produtos</h4>
             <div className="space-x-2">
-              <Badge variant="secondary">3 produtos</Badge>
-              <ProductDialogEditor />
+              <Badge variant="secondary">{products.length} produtos</Badge>
+              <ProductDialogEditor
+                spreadsheetId={spreadsheetId}
+                onSaved={() =>
+                  queryClient.invalidateQueries({
+                    queryKey: ["products", spreadsheetId],
+                  })
+                }
+              />
             </div>
           </CardHeader>
         </Card>
@@ -113,12 +97,12 @@ export const SpreadSheetEditor = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockItems.map((item) => (
+            {products.map((item, index) => (
               <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.id}</TableCell>
-                <TableCell>{item.referencia}</TableCell>
-                <TableCell>{item.definicao}</TableCell>
-                <TableCell>R$ {item.valor.toFixed(2)}</TableCell>
+                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell>{item.reference}</TableCell>
+                <TableCell>{item.definition}</TableCell>
+                <TableCell>R$ {item.price.toFixed(2)}</TableCell>
                 <TableCell className="space-x-2 text-base w-px whitespace-nowrap">
                   <FontAwesomeIcon
                     className="text-blue-500 hover:cursor-pointer"
@@ -127,6 +111,7 @@ export const SpreadSheetEditor = () => {
                   <FontAwesomeIcon
                     className="text-red-500 hover:cursor-pointer"
                     icon={faTrashCan}
+                    onClick={() => deleteMutation.mutate(item.id)}
                   />
                 </TableCell>
               </TableRow>
