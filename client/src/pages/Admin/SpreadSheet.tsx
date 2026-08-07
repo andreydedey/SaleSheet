@@ -106,29 +106,25 @@ export const SpreadSheet = () => {
         {activeSpreadsheets.map((s) => (
           <Card key={s.id} className="min-w-90 shrink-0 hover:ring-2 hover:ring-blue-500 cursor-pointer" onClick={() => navigate(`issued/${s.id}`)}>
             <CardHeader className="flex justify-between items-center">
-              <span className="font-medium">{s.name}</span>
+              <span className="font-semibold text-base">{s.name}</span>
               <Badge className="bg-green-100 text-green-600 font-semibold">
                 Ativa
               </Badge>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-xs mb-2">
+              <p className="text-muted-foreground text-sm mb-2">
                 Emitida em{" "}
                 {s.issuedAt
                   ? new Date(s.issuedAt).toLocaleDateString("pt-BR")
                   : "-"}
               </p>
               <div className="grid grid-cols-3 grid-rows-2 w-fit">
-                <span className="text-muted-foreground">Peças</span>
-                <span className="text-muted-foreground">Vendidas</span>
-                <span className="text-muted-foreground">Em aberto</span>
+                <span>Peças</span>
+                <span>Vendidas</span>
+                <span>Total Vendido</span>
                 <span className="text-base font-bold">{s.totalPieces}</span>
-                <span className="text-base font-bold text-green-500">
-                  {s.soldPieces}
-                </span>
-                <span className="text-base font-bold text-red-500">
-                  {s.totalPieces - s.soldPieces}
-                </span>
+                <span className="text-base font-bold">{s.soldPieces}</span>
+                <span className="text-base font-semibold">{formatCents(s.totalSold)}</span>
               </div>
             </CardContent>
           </Card>
@@ -186,10 +182,10 @@ export const SpreadSheet = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Planilha</TableHead>
+            <TableHead>Revendedora</TableHead>
             <TableHead>Emitida em</TableHead>
             <TableHead>Peças</TableHead>
             <TableHead>Vendidas</TableHead>
-            <TableHead>Em aberto</TableHead>
             <TableHead>Total Vendido</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
@@ -198,23 +194,21 @@ export const SpreadSheet = () => {
           {spreadsheets.map((s) => (
             <TableRow
               key={s.id}
-              className="cursor-pointer"
+              className={`cursor-pointer ${s.status === "ACTIVE" ? "bg-green-50 hover:bg-green-50" : ""}`}
               onClick={() =>
                 navigate(s.status === "DRAFT" ? `editor?id=${s.id}` : `issued/${s.id}`)
               }
             >
               <TableCell className="font-medium">{s.name}</TableCell>
+              <TableCell>{s.salespersonName ?? "-"}</TableCell>
               <TableCell>
                 {s.issuedAt
-                  ? new Date(s.issuedAt).toLocaleDateString("pt-BR")
+                  ? new Date(s.issuedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }).replace(" de ", " ").replace(/^./, c => c.toUpperCase())
                   : "-"}
               </TableCell>
               <TableCell>{s.totalPieces}</TableCell>
               <TableCell className="text-green-600 font-semibold">
                 {s.soldPieces}
-              </TableCell>
-              <TableCell className="text-red-500 font-semibold">
-                {s.totalPieces - s.soldPieces}
               </TableCell>
               <TableCell className="font-semibold">{formatCents(s.totalSold)}</TableCell>
               <TableCell>

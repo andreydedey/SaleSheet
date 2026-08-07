@@ -3,6 +3,7 @@ package com.example.salesheet.repositories;
 import com.example.salesheet.dto.SpreadSheetListDTO;
 import com.example.salesheet.entities.Product;
 import com.example.salesheet.entities.SpreadSheet;
+import com.example.salesheet.entities.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
@@ -25,11 +26,13 @@ public class SpreadsheetRepositoryImpl implements SpreadsheetRepositoryCustom {
         CriteriaQuery<SpreadSheetListDTO> query = cb.createQuery(SpreadSheetListDTO.class);
         Root<SpreadSheet> root = query.from(SpreadSheet.class);
         Join<SpreadSheet, Product> productJoin = root.join("products", JoinType.LEFT);
+        Join<SpreadSheet, User> userJoin = root.join("user", JoinType.LEFT);
 
         query.select(cb.construct(
                 SpreadSheetListDTO.class,
                 root.get("id"),
                 root.get("name"),
+                userJoin.get("name"),
                 root.get("issuedAt"),
                 cb.count(productJoin.get("id")),
                 cb.sum(cb.<Long>selectCase()
@@ -50,7 +53,7 @@ public class SpreadsheetRepositoryImpl implements SpreadsheetRepositoryCustom {
             }
         }
 
-        query.groupBy(root.get("id"));
+        query.groupBy(root.get("id"), userJoin.get("id"), userJoin.get("name"));
 
         if (pageable.getSort().isSorted()) {
             List<Order> orders = pageable.getSort().stream()

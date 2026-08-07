@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class SpreadSheetListDTO {
     private Long id;
     private String name;
+    private String salespersonName;
     private LocalDateTime issuedAt;
     private long totalPieces;
     private long soldPieces;

@@ -48,7 +48,7 @@ class SpreadsheetControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void listSpreadsheets_returnsPage() throws Exception {
-        var item = new SpreadSheetListDTO(1L, "PLN-001", null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
+        var item = new SpreadSheetListDTO(1L, "PLN-001", "Ana Silva", null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
         var page = new PageImpl<>(List.of(item), PageRequest.of(0, 20), 1);
         when(spreadsheetService.list(any(), any(), any(), any())).thenReturn(page);
 

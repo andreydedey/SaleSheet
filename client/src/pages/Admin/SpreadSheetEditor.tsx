@@ -1,16 +1,6 @@
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { EmitSpreadsheetDialog } from "@/components/EmitSpreadsheetDialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -20,7 +10,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {
   Table,
@@ -33,12 +22,11 @@ import {
 import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Link, useSearchParams, useNavigate } from "react-router"
+import { Link, useSearchParams } from "react-router"
 import { useState } from "react"
 import type { ProductDTO } from "@/types/api"
 import {
   getSpreadsheet,
-  emitSpreadsheet,
   updateSpreadsheetSalesperson,
 } from "@/lib/api/spreadsheets"
 import { listProducts, deleteProduct } from "@/lib/api/products"
@@ -48,7 +36,6 @@ import { formatCents } from "@/components/ui/currency-input"
 
 export const SpreadSheetEditor = () => {
   const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const spreadsheetId = Number(searchParams.get("id"))
 
@@ -65,16 +52,6 @@ export const SpreadSheetEditor = () => {
   const { data: salespersonsPage } = useQuery({
     queryKey: ["dashboard", "salespersons"],
     queryFn: () => getSalespersons(0, 100),
-  })
-
-  const emitMutation = useMutation({
-    mutationFn: () => emitSpreadsheet(spreadsheetId),
-    onSuccess: () => {
-      toast.success("Planilha emitida.")
-      queryClient.invalidateQueries({ queryKey: ["spreadsheets"] })
-      navigate(`/spreadsheets/issued/${spreadsheetId}`)
-    },
-    onError: () => toast.error("Erro ao emitir planilha."),
   })
 
   const salespersonMutation = useMutation({
@@ -135,25 +112,7 @@ export const SpreadSheetEditor = () => {
             · não emitida
           </h3>
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button size="lg" disabled={!canEmit}>Emitir Planilha</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Emitir planilha?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Após emitida, a planilha ficará visível para o revendedor e não poderá ser editada.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={() => emitMutation.mutate()}>
-                Emitir
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <EmitSpreadsheetDialog spreadsheetId={spreadsheetId} disabled={!canEmit} />
       </div>
       <Card>
         <CardContent className="flex justify-between items-center">

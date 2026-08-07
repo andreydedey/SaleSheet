@@ -26,6 +26,8 @@ import {
 import { faBoxOpen, faDollarSign } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
+import { InactivateSpreadsheetDialog } from "@/components/InactivateSpreadsheetDialog"
+import { ActivateSpreadsheetDialog } from "@/components/ActivateSpreadsheetDialog"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { formatCents } from "@/components/ui/currency-input"
@@ -106,13 +108,17 @@ export const IssuedSpreadSheet = () => {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="flex justify-between">
+      <div className="flex justify-between items-start">
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
             <h1 className="text-2xl font-bold">
               Planilha - {spreadsheet?.name}
             </h1>
-            <Badge className="bg-green-50 text-green-700">Emitida</Badge>
+            {spreadsheet?.status === "ACTIVE" ? (
+              <Badge className="bg-green-50 text-green-700">Emitida</Badge>
+            ) : (
+              <Badge className="bg-gray-100 text-gray-600">Inativa</Badge>
+            )}
           </div>
           <h3 className="text-muted-foreground text-[14px]">
             Emitida em{" "}
@@ -122,6 +128,17 @@ export const IssuedSpreadSheet = () => {
             · {totalPieces} peças
           </h3>
         </div>
+        {spreadsheet?.status === "ACTIVE" ? (
+          <InactivateSpreadsheetDialog
+            spreadsheetId={spreadsheetId}
+            salespersonName={spreadsheet.salespersonName}
+          />
+        ) : (
+          <ActivateSpreadsheetDialog
+            spreadsheetId={spreadsheetId}
+            salespersonName={spreadsheet?.salespersonName}
+          />
+        )}
       </div>
       <div className="flex gap-4 *:flex-1">
         <Card>
@@ -198,7 +215,7 @@ export const IssuedSpreadSheet = () => {
           </TableHeader>
           <TableBody>
             {products.map((item, index) => (
-              <TableRow key={item.id}>
+              <TableRow key={item.id} className={item.sold ? "bg-green-50 hover:bg-green-50" : ""}>
                 <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
                 <TableCell>{item.definition}</TableCell>

@@ -13,6 +13,7 @@ export type SpreadSheetStatus = "DRAFT" | "ACTIVE" | "INACTIVE"
 export type SpreadSheetListDTO = {
   id: number
   name: string
+  salespersonName: string | null
   issuedAt: string | null
   totalPieces: number
   soldPieces: number

@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getMyStats, getMySpreadsheets } from "@/lib/api/salesperson"
 import { useAuth } from "@/context/AuthContext"
 import { Link } from "react-router"
+import { formatCents } from "@/components/ui/currency-input"
 import type { SpreadSheetStatus } from "@/types/api"
 
 const statusLabel: Record<SpreadSheetStatus, string> = {
@@ -47,7 +48,7 @@ export const Home = () => {
         <CardHeader className="space-y-2">
           <CardDescription>Total acumulado de vendas</CardDescription>
           <p className="text-primary-foreground font-bold text-3xl">
-            R$ {stats?.totalSold?.toFixed(2) ?? "0,00"}
+            {formatCents(stats?.totalSold ?? 0)}
           </p>
         </CardHeader>
         <CardContent className="grid grid-cols-3 grid-rows-2 gap-y-0">
