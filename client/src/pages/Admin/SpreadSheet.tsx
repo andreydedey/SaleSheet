@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CreateSpreadSheetDialog } from "@/components/CreateSpreadsheetDialog"
+import { Link, useNavigate } from "react-router"
 import { useQuery } from "@tanstack/react-query"
 import { listSpreadsheets } from "@/lib/api/spreadsheets"
 import { useState } from "react"
@@ -31,6 +32,7 @@ const statusStyle: Record<SpreadSheetStatus, string> = {
 }
 
 export const SpreadSheet = () => {
+  const navigate = useNavigate()
   const [nameFilter, setNameFilter] = useState("")
 
   const { data: spreadsheetsPage } = useQuery({
@@ -51,7 +53,7 @@ export const SpreadSheet = () => {
         <div>
           <h1 className="text-2xl font-bold">Planilhas</h1>
           <h3 className="text-muted-foreground">
-            Gerencie todas as planilhas das revendedoras
+            Gerencie todas as planilhas dos revendedores
           </h3>
         </div>
         <CreateSpreadSheetDialog />
@@ -70,7 +72,7 @@ export const SpreadSheet = () => {
       </div>
       <div className="flex gap-2">
         {activeSpreadsheets.map((s) => (
-          <Card key={s.id} className="min-w-90">
+          <Card key={s.id} className="min-w-90 hover:ring-2 hover:ring-blue-500 cursor-pointer" onClick={() => navigate(`issued/${s.id}`)}>
             <CardHeader className="flex justify-between items-center">
               <span className="font-medium">{s.name}</span>
               <Badge className="bg-green-100 text-green-600 font-semibold">
@@ -134,19 +136,14 @@ export const SpreadSheet = () => {
         </TableHeader>
         <TableBody>
           {spreadsheetsPage?.content.map((s) => (
-            <TableRow key={s.id}>
-              <TableCell className="font-medium">
-                <Link
-                  to={
-                    s.status === "DRAFT"
-                      ? `editor?id=${s.id}`
-                      : `issued/${s.id}`
-                  }
-                  className="hover:underline"
-                >
-                  {s.name}
-                </Link>
-              </TableCell>
+            <TableRow
+              key={s.id}
+              className="cursor-pointer"
+              onClick={() =>
+                navigate(s.status === "DRAFT" ? `editor?id=${s.id}` : `issued/${s.id}`)
+              }
+            >
+              <TableCell className="font-medium">{s.name}</TableCell>
               <TableCell>
                 {s.issuedAt
                   ? new Date(s.issuedAt).toLocaleDateString("pt-BR")

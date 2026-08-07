@@ -12,6 +12,6 @@ public class ProductDTO {
     private String reference;
     private Long price;
     private String definition;
-    private boolean sold;
+    private Boolean sold;
     private String observation;
 }

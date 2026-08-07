@@ -31,12 +31,12 @@ public class SpreadsheetRepositoryImpl implements SpreadsheetRepositoryCustom {
                 root.get("id"),
                 root.get("name"),
                 root.get("issuedAt"),
-                cb.count(productJoin.get("id")).as(Integer.class),
-                cb.sum(cb.<Integer>selectCase()
-                        .when(cb.isTrue(productJoin.get("sold")), 1)
-                        .otherwise(0)
-                ).as(Integer.class),
-                root.get("status").as(String.class)
+                cb.count(productJoin.get("id")),
+                cb.sum(cb.<Long>selectCase()
+                        .when(cb.isTrue(productJoin.get("sold")), 1L)
+                        .otherwise(0L)
+                ),
+                root.get("status")
         ));
 
         if (spec != null) {

@@ -25,6 +25,8 @@ export type SpreadSheetDTO = {
   createdAt: string
   issuedAt: string | null
   status: SpreadSheetStatus
+  salespersonId: string | null
+  salespersonName: string | null
 }
 
 export type ProductDTO = {

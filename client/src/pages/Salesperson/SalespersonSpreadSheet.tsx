@@ -19,8 +19,7 @@ const statusLabel: Record<SpreadSheetStatus, string> = {
   INACTIVE: "Inativo",
 }
 
-const formatCurrency = (value: number) =>
-  value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+import { formatCents } from "@/components/ui/currency-input"
 
 export const SalespersonSpreadSheet = () => {
   const navigate = useNavigate()
@@ -92,7 +91,7 @@ export const SalespersonSpreadSheet = () => {
         <div>
           <p className="text-sm text-muted-foreground">Total</p>
           <p className="font-bold text-lg text-violet-600">
-            {formatCurrency(totalSold)}
+            {formatCents(totalSold)}
           </p>
         </div>
       </div>
@@ -124,7 +123,7 @@ export const SalespersonSpreadSheet = () => {
                   item.sold ? "text-green-600" : "text-foreground",
                 )}
               >
-                {formatCurrency(item.price)}
+                {formatCents(item.price)}
               </p>
             </div>
             <div className="flex items-center gap-4">

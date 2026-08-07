@@ -18,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.salesheet.enums.SpreadSheetStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +48,7 @@ class SpreadsheetControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void listSpreadsheets_returnsPage() throws Exception {
-        var item = new SpreadSheetListDTO(1L, "PLN-001", null, 5, 2, "ACTIVE");
+        var item = new SpreadSheetListDTO(1L, "PLN-001", null, 5L, 2L, SpreadSheetStatus.ACTIVE);
         var page = new PageImpl<>(List.of(item), PageRequest.of(0, 20), 1);
         when(spreadsheetService.list(any(), any(), any(), any())).thenReturn(page);
 

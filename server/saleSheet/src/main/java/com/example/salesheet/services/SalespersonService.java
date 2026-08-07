@@ -23,8 +23,8 @@ public class SalespersonService {
 
         var spreadsheets = spreadsheetRepository.findAllAsListDTO(spec, Pageable.unpaged());
 
-        int totalPieces = spreadsheets.getContent().stream().mapToInt(s -> s.getTotalPieces()).sum();
-        int totalSoldPieces = spreadsheets.getContent().stream().mapToInt(s -> s.getSoldPieces()).sum();
+        long totalPieces = spreadsheets.getContent().stream().mapToLong(s -> s.getTotalPieces()).sum();
+        long totalSoldPieces = spreadsheets.getContent().stream().mapToLong(s -> s.getSoldPieces()).sum();
         long totalSold = 0; // Price sum would need a separate query
 
         return new SalespersonStatsDTO(totalSold, totalPieces, totalSoldPieces, spreadsheets.getContent().size());

@@ -22,7 +22,7 @@ public class ProductMapper {
         product.setReference(dto.getReference());
         product.setPrice(dto.getPrice());
         product.setDefinition(dto.getDefinition());
-        product.setSold(dto.isSold());
+        product.setSold(dto.getSold() != null && dto.getSold());
         product.setObservation(dto.getObservation());
         product.setSpreadSheet(spreadSheet);
         return product;

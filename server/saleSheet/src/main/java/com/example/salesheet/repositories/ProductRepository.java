@@ -19,8 +19,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             )
             FROM Product p
             WHERE p.spreadSheet.id = :spreadSheetId
+            ORDER BY p.id ASC
             """)
     Page<ProductDTO> findProductsBySpreadSheetId(Long spreadSheetId, Pageable pageable);
 
     Optional<Product> findByIdAndSpreadSheetId(Long id, Long spreadSheetId);
+
+    long countBySpreadSheetId(Long spreadSheetId);
 }

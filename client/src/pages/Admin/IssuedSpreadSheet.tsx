@@ -25,10 +25,16 @@ import {
 } from "@fortawesome/free-regular-svg-icons"
 import { faBoxOpen, faDollarSign } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+import { formatCents } from "@/components/ui/currency-input"
 import { useParams } from "react-router"
 import { getSpreadsheet } from "@/lib/api/spreadsheets"
 import { listProducts, markSold, deleteProduct } from "@/lib/api/products"
+import { ProductDialogEditor } from "@/components/ProductDialogEditor"
+import { useState } from "react"
+import type { ProductDTO } from "@/types/api"
 
 export const IssuedSpreadSheet = () => {
   const { id } = useParams<{ id: string }>()
@@ -56,11 +62,20 @@ export const IssuedSpreadSheet = () => {
   const deleteMutation = useMutation({
     mutationFn: (itemId: number) => deleteProduct(spreadsheetId, itemId),
     onSuccess: () => {
+      toast.success("Produto removido.")
       queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
     },
+    onError: () => toast.error("Erro ao remover produto."),
   })
 
   const products = productsPage?.content ?? []
+  const [editingProduct, setEditingProduct] = useState<ProductDTO | undefined>()
+  const [editOpen, setEditOpen] = useState(false)
+
+  const openEdit = (product: ProductDTO) => {
+    setEditingProduct(product)
+    setEditOpen(true)
+  }
   const totalPieces = products.length
   const soldPieces = products.filter((p) => p.sold).length
   const unsoldPieces = totalPieces - soldPieces
@@ -132,7 +147,7 @@ export const IssuedSpreadSheet = () => {
             <div>
               <p className="text-muted-foreground text-xs">Total Vendido</p>
               <p className="text-foreground text-xl font-bold">
-                R$ {totalSold.toFixed(2)}
+                {formatCents(totalSold)}
               </p>
             </div>
           </CardContent>
@@ -150,7 +165,7 @@ export const IssuedSpreadSheet = () => {
         <Table className="ring-0 border border-t">
           <TableHeader>
             <TableRow>
-              <TableHead>N</TableHead>
+              <TableHead>ID</TableHead>
               <TableHead>Referência</TableHead>
               <TableHead>Definição</TableHead>
               <TableHead>Valor</TableHead>
@@ -163,10 +178,10 @@ export const IssuedSpreadSheet = () => {
           <TableBody>
             {products.map((item, index) => (
               <TableRow key={item.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
                 <TableCell>{item.definition}</TableCell>
-                <TableCell>R$ {item.price.toFixed(2)}</TableCell>
+                <TableCell>{formatCents(item.price)}</TableCell>
                 <TableCell>
                   <Checkbox
                     checked={item.sold}
@@ -219,11 +234,17 @@ export const IssuedSpreadSheet = () => {
                   <FontAwesomeIcon
                     className="text-blue-500 hover:cursor-pointer"
                     icon={faEdit}
+                    onClick={() => openEdit(item)}
                   />
-                  <FontAwesomeIcon
-                    className="text-red-500 hover:cursor-pointer"
-                    icon={faTrashCan}
-                    onClick={() => deleteMutation.mutate(item.id)}
+                  <DeleteConfirmDialog
+                    trigger={
+                      <FontAwesomeIcon
+                        className="text-red-500 hover:cursor-pointer"
+                        icon={faTrashCan}
+                      />
+                    }
+                    description="O produto será removido permanentemente da planilha."
+                    onConfirm={() => deleteMutation.mutate(item.id)}
                   />
                 </TableCell>
               </TableRow>
@@ -231,6 +252,15 @@ export const IssuedSpreadSheet = () => {
           </TableBody>
         </Table>
       </div>
+      <ProductDialogEditor
+        spreadsheetId={spreadsheetId}
+        product={editingProduct}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={() =>
+          queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+        }
+      />
     </div>
   )
 }

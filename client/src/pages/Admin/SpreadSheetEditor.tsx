@@ -1,7 +1,19 @@
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
+import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -14,8 +26,17 @@ import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSearchParams, useNavigate } from "react-router"
-import { getSpreadsheet, emitSpreadsheet } from "@/lib/api/spreadsheets"
+import { useState } from "react"
+import type { ProductDTO } from "@/types/api"
+import {
+  getSpreadsheet,
+  emitSpreadsheet,
+  updateSpreadsheetSalesperson,
+} from "@/lib/api/spreadsheets"
 import { listProducts, deleteProduct } from "@/lib/api/products"
+import { getSalespersons } from "@/lib/api/dashboard"
+import { toast } from "sonner"
+import { formatCents } from "@/components/ui/currency-input"
 
 export const SpreadSheetEditor = () => {
   const [searchParams] = useSearchParams()
@@ -33,22 +54,50 @@ export const SpreadSheetEditor = () => {
     queryFn: () => listProducts(spreadsheetId, 0, 100),
   })
 
+  const { data: salespersonsPage } = useQuery({
+    queryKey: ["dashboard", "salespersons"],
+    queryFn: () => getSalespersons(0, 100),
+  })
+
   const emitMutation = useMutation({
     mutationFn: () => emitSpreadsheet(spreadsheetId),
     onSuccess: () => {
+      toast.success("Planilha emitida.")
       queryClient.invalidateQueries({ queryKey: ["spreadsheets"] })
       navigate(`/spreadsheets/issued/${spreadsheetId}`)
     },
+    onError: () => toast.error("Erro ao emitir planilha."),
+  })
+
+  const salespersonMutation = useMutation({
+    mutationFn: (salespersonId: string) =>
+      updateSpreadsheetSalesperson(spreadsheetId, salespersonId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spreadsheet", spreadsheetId] })
+    },
+    onError: () => toast.error("Erro ao atualizar revendedor."),
   })
 
   const deleteMutation = useMutation({
     mutationFn: (itemId: number) => deleteProduct(spreadsheetId, itemId),
     onSuccess: () => {
+      toast.success("Produto removido.")
       queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
     },
+    onError: () => toast.error("Erro ao remover produto."),
   })
 
   const products = productsPage?.content ?? []
+  const salespersons = salespersonsPage?.content ?? []
+  const [editingProduct, setEditingProduct] = useState<ProductDTO | undefined>()
+  const [editOpen, setEditOpen] = useState(false)
+
+  const canEmit = products.length > 0 && !!spreadsheet?.salespersonId
+
+  const openEdit = (product: ProductDTO) => {
+    setEditingProduct(product)
+    setEditOpen(true)
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -65,10 +114,49 @@ export const SpreadSheetEditor = () => {
             · não emitida
           </h3>
         </div>
-        <Button size="lg" onClick={() => emitMutation.mutate()}>
-          Emitir Planilha
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button size="lg" disabled={!canEmit}>Emitir Planilha</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Emitir planilha?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Após emitida, a planilha ficará visível para o revendedor e não poderá ser editada.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={() => emitMutation.mutate()}>
+                Emitir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
+      <Card>
+        <CardContent className="flex justify-between items-center">
+          <div>
+            <p className="font-semibold text-base">Revendedor</p>
+            <p className="text-muted-foreground text-sm">
+              A planilha ficará visível para o revendedor somente após ser emitida.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1 min-w-56">
+            <label className="text-sm font-medium">Revendedor</label>
+            <select
+              className="border rounded-md px-3 py-2 text-sm bg-background"
+              value={spreadsheet?.salespersonId ?? ""}
+              onChange={(e) => salespersonMutation.mutate(e.target.value)}
+            >
+              <option value="" disabled>Selecione o revendedor</option>
+              {salespersons.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+        </CardContent>
+      </Card>
       <div>
         <Card className="ring-0 border border-b-0 rounded-b-none">
           <CardHeader className="flex justify-between">
@@ -89,7 +177,7 @@ export const SpreadSheetEditor = () => {
         <Table className="ring-0 border border-t">
           <TableHeader>
             <TableRow>
-              <TableHead>N</TableHead>
+              <TableHead>ID</TableHead>
               <TableHead>Referência</TableHead>
               <TableHead>Definição</TableHead>
               <TableHead>Valor</TableHead>
@@ -97,21 +185,27 @@ export const SpreadSheetEditor = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((item, index) => (
+            {products.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
                 <TableCell>{item.definition}</TableCell>
-                <TableCell>R$ {item.price.toFixed(2)}</TableCell>
+                <TableCell>{formatCents(item.price)}</TableCell>
                 <TableCell className="space-x-2 text-base w-px whitespace-nowrap">
                   <FontAwesomeIcon
                     className="text-blue-500 hover:cursor-pointer"
                     icon={faEdit}
+                    onClick={() => openEdit(item)}
                   />
-                  <FontAwesomeIcon
-                    className="text-red-500 hover:cursor-pointer"
-                    icon={faTrashCan}
-                    onClick={() => deleteMutation.mutate(item.id)}
+                  <DeleteConfirmDialog
+                    trigger={
+                      <FontAwesomeIcon
+                        className="text-red-500 hover:cursor-pointer"
+                        icon={faTrashCan}
+                      />
+                    }
+                    description="O produto será removido permanentemente da planilha."
+                    onConfirm={() => deleteMutation.mutate(item.id)}
                   />
                 </TableCell>
               </TableRow>
@@ -119,6 +213,15 @@ export const SpreadSheetEditor = () => {
           </TableBody>
         </Table>
       </div>
+      <ProductDialogEditor
+        spreadsheetId={spreadsheetId}
+        product={editingProduct}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={() =>
+          queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+        }
+      />
     </div>
   )
 }

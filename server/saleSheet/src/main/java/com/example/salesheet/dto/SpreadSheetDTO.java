@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -15,4 +16,6 @@ public class SpreadSheetDTO {
     private LocalDateTime createdAt;
     private LocalDateTime issuedAt;
     private String status;
+    private UUID salespersonId;
+    private String salespersonName;
 }

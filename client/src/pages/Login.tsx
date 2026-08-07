@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faGoogle } from "@fortawesome/free-brands-svg-icons"
 import { faStar } from "@fortawesome/free-regular-svg-icons"
+import { faSpinner } from "@fortawesome/free-solid-svg-icons"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -12,12 +13,14 @@ import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type z from "zod"
 import { loginSchema } from "@/schemas/loginSchema"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/AuthContext"
+import { useState } from "react"
 
 export const Login = () => {
   const { login } = useAuth()
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
 
   const { handleSubmit, control } = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -26,6 +29,11 @@ export const Login = () => {
   const apiLogin = (data: z.infer<typeof loginSchema>) => {
     console.log("Você está muito linda prima!")
     console.log(data)
+  }
+
+  const handleGoogleLogin = () => {
+    setIsLoggingIn(true)
+    login()
   }
 
   return (
@@ -45,10 +53,15 @@ export const Login = () => {
           <Button
             className="w-full h-12 hover:cursor-pointer shadow-sm"
             variant="outline"
-            onClick={login}
+            onClick={handleGoogleLogin}
+            disabled={isLoggingIn}
           >
-            <FontAwesomeIcon className="text-blue-500" icon={faGoogle} />
-            Continuar com Google
+            {isLoggingIn ? (
+              <FontAwesomeIcon className="animate-spin" icon={faSpinner} />
+            ) : (
+              <FontAwesomeIcon className="text-blue-500" icon={faGoogle} />
+            )}
+            {isLoggingIn ? "Redirecionando..." : "Continuar com Google"}
           </Button>
         </div>
         <div className="flex items-center gap-2 my-2">
@@ -70,6 +83,7 @@ export const Login = () => {
                     aria-invalid={fieldState.invalid}
                     placeholder="seu@email.com"
                   />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
             />
@@ -86,6 +100,7 @@ export const Login = () => {
                     aria-invalid={fieldState.invalid}
                     placeholder="••••••••"
                   />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
             />

@@ -10,13 +10,14 @@ import {
   DialogTrigger,
 } from "./ui/dialog"
 import { faPlusSquare } from "@fortawesome/free-regular-svg-icons"
-import { Field, FieldGroup, FieldLabel } from "./ui/field"
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "./ui/input"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createSpreadsheet } from "@/lib/api/spreadsheets"
 import { getSalespersons } from "@/lib/api/dashboard"
 import { useState } from "react"
+import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "react-router"
@@ -46,10 +47,12 @@ export const CreateSpreadSheetDialog = () => {
   const mutation = useMutation({
     mutationFn: (data: CreateSpreadsheetForm) => createSpreadsheet(data),
     onSuccess: (data) => {
+      toast.success("Planilha criada.")
       reset()
       setOpen(false)
       navigate(`/spreadsheets/editor?id=${data.id}`)
     },
+    onError: () => toast.error("Erro ao criar planilha."),
   })
 
   const onSubmit = (data: CreateSpreadsheetForm) => mutation.mutate(data)
@@ -85,6 +88,7 @@ export const CreateSpreadSheetDialog = () => {
                     aria-invalid={fieldState.invalid}
                     {...field}
                   />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
             />
@@ -106,6 +110,7 @@ export const CreateSpreadSheetDialog = () => {
                       </option>
                     ))}
                   </select>
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
             />

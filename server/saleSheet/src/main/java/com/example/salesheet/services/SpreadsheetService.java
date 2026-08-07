@@ -6,6 +6,7 @@ import com.example.salesheet.dto.SpreadSheetListDTO;
 import com.example.salesheet.entities.SpreadSheet;
 import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.mappers.SpreadSheetMapper;
+import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
 import com.example.salesheet.specifications.SpreadSheetSpecifications;
@@ -25,6 +26,7 @@ public class SpreadsheetService {
 
     private final SpreadsheetRepository spreadsheetRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
     public Page<SpreadSheetListDTO> list(UUID salespersonId, SpreadSheetStatus status, String name, Pageable pageable) {
         var spec = SpreadSheetSpecifications.buildSpec(salespersonId, status, name);
@@ -68,8 +70,27 @@ public class SpreadsheetService {
         var spreadSheet = spreadsheetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));
 
+        if (spreadSheet.getUser() == null) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Spreadsheet must have a salesperson assigned");
+        }
+
+        long productCount = productRepository.countBySpreadSheetId(id);
+        if (productCount == 0) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Spreadsheet must have at least one product");
+        }
+
         spreadSheet.setStatus(SpreadSheetStatus.ACTIVE);
         spreadSheet.setIssuedAt(LocalDateTime.now());
+        spreadSheet = spreadsheetRepository.save(spreadSheet);
+        return SpreadSheetMapper.toDTO(spreadSheet);
+    }
+
+    public SpreadSheetDTO updateSalesperson(Long id, UUID salespersonId) {
+        var spreadSheet = spreadsheetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));
+        var user = userRepository.findById(salespersonId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Salesperson not found"));
+        spreadSheet.setUser(user);
         spreadSheet = spreadsheetRepository.save(spreadSheet);
         return SpreadSheetMapper.toDTO(spreadSheet);
     }

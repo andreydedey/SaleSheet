@@ -3,6 +3,7 @@ package com.example.salesheet.controllers;
 import com.example.salesheet.dto.SpreadSheetCreateDTO;
 import com.example.salesheet.dto.SpreadSheetDTO;
 import com.example.salesheet.dto.SpreadSheetListDTO;
+import com.example.salesheet.dto.UpdateSalespersonDTO;
 import com.example.salesheet.dto.UpdateStatusDTO;
 import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.services.SpreadsheetService;
@@ -57,5 +58,12 @@ public class SpreadsheetController {
     @PostMapping("/{id}/emit")
     public ResponseEntity<SpreadSheetDTO> emit(@PathVariable Long id) {
         return ResponseEntity.ok(spreadsheetService.emit(id));
+    }
+
+    @PatchMapping("/{id}/salesperson")
+    public ResponseEntity<SpreadSheetDTO> updateSalesperson(
+            @PathVariable Long id,
+            @RequestBody UpdateSalespersonDTO dto) {
+        return ResponseEntity.ok(spreadsheetService.updateSalesperson(id, dto.salespersonId()));
     }
 }

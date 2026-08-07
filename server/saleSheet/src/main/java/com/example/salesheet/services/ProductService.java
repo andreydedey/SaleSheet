@@ -39,7 +39,6 @@ public class ProductService {
         product.setPrice(dto.getPrice());
         product.setDefinition(dto.getDefinition());
         product.setObservation(dto.getObservation());
-        product.setSold(dto.isSold());
 
         product = productRepository.save(product);
         return ProductMapper.toDTO(product);

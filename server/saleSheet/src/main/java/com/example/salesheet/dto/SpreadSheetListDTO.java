@@ -1,5 +1,6 @@
 package com.example.salesheet.dto;
 
+import com.example.salesheet.enums.SpreadSheetStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ public class SpreadSheetListDTO {
     private Long id;
     private String name;
     private LocalDateTime issuedAt;
-    private int totalPieces;
-    private int soldPieces;
-    private String status;
+    private long totalPieces;
+    private long soldPieces;
+    private SpreadSheetStatus status;
 }

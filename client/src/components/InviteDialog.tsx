@@ -7,61 +7,83 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog"
-import { faPlus } from "@fortawesome/free-solid-svg-icons"
-import { Field, FieldGroup, FieldLabel } from "./ui/field"
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "./ui/input"
 import { useMutation } from "@tanstack/react-query"
-import { inviteSalesperson } from "@/lib/api/users"
-import { useState } from "react"
+import { inviteSalesperson, updateSalesperson } from "@/lib/api/users"
+import { useEffect } from "react"
+import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import type { SalespersonDTO } from "@/types/api"
+import { faPlus } from "@fortawesome/free-solid-svg-icons"
 
-const inviteSchema = z.object({
+const schema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
 })
 
-type InviteFormData = z.infer<typeof inviteSchema>
+type FormData = z.infer<typeof schema>
 
 interface InviteDialogProps {
-  onInvited?: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  salesperson?: SalespersonDTO
+  onSuccess?: () => void
 }
 
-export const InviteDialog: React.FC<InviteDialogProps> = ({ onInvited }) => {
-  const [open, setOpen] = useState(false)
-  const { control, handleSubmit, reset } = useForm<InviteFormData>({
-    resolver: zodResolver(inviteSchema),
+export const InviteDialog: React.FC<InviteDialogProps> = ({
+  open,
+  onOpenChange,
+  salesperson,
+  onSuccess,
+}) => {
+  const isEdit = !!salesperson
+
+  const { control, handleSubmit, reset } = useForm<FormData>({
+    resolver: zodResolver(schema),
     defaultValues: { name: "", email: "" },
   })
 
+  useEffect(() => {
+    if (open) {
+      reset(
+        salesperson
+          ? { name: salesperson.name, email: salesperson.email }
+          : { name: "", email: "" }
+      )
+    }
+  }, [open, salesperson, reset])
+
   const mutation = useMutation({
-    mutationFn: (data: InviteFormData) => inviteSalesperson(data),
+    mutationFn: (data: FormData) =>
+      isEdit
+        ? updateSalesperson(salesperson!.id, data)
+        : inviteSalesperson(data),
     onSuccess: () => {
-      reset()
-      setOpen(false)
-      onInvited?.()
+      toast.success(isEdit ? "Revendedor atualizado." : "Revendedor convidado.")
+      onOpenChange(false)
+      onSuccess?.()
+    },
+    onError: () => {
+      toast.error(isEdit ? "Erro ao atualizar revendedor." : "Erro ao convidar revendedor.")
     },
   })
 
-  const onSubmit = (data: InviteFormData) => mutation.mutate(data)
+  const onSubmit = (data: FormData) => mutation.mutate(data)
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="lg">
-          <FontAwesomeIcon icon={faPlus} />
-          Convidar Revendedora
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="min-w-md"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Convidar Revendedora</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Editar Revendedor" : "Convidar Revendedor"}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
@@ -73,10 +95,11 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ onInvited }) => {
                   <FieldLabel htmlFor="invite-name">Nome</FieldLabel>
                   <Input
                     id="invite-name"
-                    placeholder="Nome da revendedora"
+                    placeholder="Nome do revendedor"
                     aria-invalid={fieldState.invalid}
                     {...field}
                   />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
             />
@@ -93,6 +116,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ onInvited }) => {
                     aria-invalid={fieldState.invalid}
                     {...field}
                   />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
             />
@@ -103,10 +127,23 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ onInvited }) => {
                 Cancelar
               </Button>
             </DialogClose>
-            <Button type="submit">Convidar</Button>
+            <Button type="submit" disabled={mutation.isPending}>
+              {isEdit ? "Salvar" : "Convidar"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   )
 }
+
+interface InviteButtonProps {
+  onClick: () => void
+}
+
+export const InviteButton: React.FC<InviteButtonProps> = ({ onClick }) => (
+  <Button size="lg" onClick={onClick}>
+    <FontAwesomeIcon icon={faPlus} />
+    Convidar Revendedor
+  </Button>
+)

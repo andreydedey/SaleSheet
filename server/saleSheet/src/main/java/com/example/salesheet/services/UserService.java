@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -27,5 +29,19 @@ public class UserService {
         user.setRole(Role.SALESPERSON);
         user.setStatus(Status.PENDING);
         userRepository.save(user);
+    }
+
+    public void updateSalesperson(UUID id, InviteDTO dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        userRepository.save(user);
+    }
+
+    public void deleteSalesperson(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        userRepository.delete(user);
     }
 }

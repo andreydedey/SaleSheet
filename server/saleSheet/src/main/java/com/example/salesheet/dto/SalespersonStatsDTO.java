@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SalespersonStatsDTO {
     private long totalSold;
-    private int totalPieces;
-    private int totalSoldPieces;
+    private long totalPieces;
+    private long totalSoldPieces;
     private int totalSpreadsheets;
 }

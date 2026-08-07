@@ -25,7 +25,7 @@ public class SpreadSheetSpecifications {
     }
 
     public static Specification<SpreadSheet> buildSpec(UUID salespersonId, SpreadSheetStatus status, String name) {
-        Specification<SpreadSheet> spec = Specification.where((Specification<SpreadSheet>) null);
+        Specification<SpreadSheet> spec = (root, query, cb) -> cb.conjunction();
 
         if (salespersonId != null) {
             spec = spec.and(hasUser(salespersonId));
