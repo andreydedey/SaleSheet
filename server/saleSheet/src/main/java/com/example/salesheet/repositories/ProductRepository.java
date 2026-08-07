@@ -26,4 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByIdAndSpreadSheetId(Long id, Long spreadSheetId);
 
     long countBySpreadSheetId(Long spreadSheetId);
+
+    @Query("SELECT COALESCE(SUM(p.price), 0) FROM Product p WHERE p.sold = true")
+    long sumSoldPrices();
 }

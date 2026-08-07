@@ -12,6 +12,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {
@@ -25,7 +33,7 @@ import {
 import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useSearchParams, useNavigate } from "react-router"
+import { Link, useSearchParams, useNavigate } from "react-router"
 import { useState } from "react"
 import type { ProductDTO } from "@/types/api"
 import {
@@ -101,6 +109,19 @@ export const SpreadSheetEditor = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/spreadsheets">Planilhas</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{spreadsheet?.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className="flex justify-between">
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
@@ -190,7 +211,7 @@ export const SpreadSheetEditor = () => {
                 <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
                 <TableCell>{item.definition}</TableCell>
-                <TableCell>{formatCents(item.price)}</TableCell>
+                <TableCell className="font-semibold">{formatCents(item.price)}</TableCell>
                 <TableCell className="space-x-2 text-base w-px whitespace-nowrap">
                   <FontAwesomeIcon
                     className="text-blue-500 hover:cursor-pointer"

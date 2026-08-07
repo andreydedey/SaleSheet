@@ -16,6 +16,7 @@ export type SpreadSheetListDTO = {
   issuedAt: string | null
   totalPieces: number
   soldPieces: number
+  totalSold: number
   status: SpreadSheetStatus
 }
 

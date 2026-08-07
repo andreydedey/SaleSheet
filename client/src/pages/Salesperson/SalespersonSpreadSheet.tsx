@@ -1,13 +1,19 @@
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { faMessage } from "@fortawesome/free-regular-svg-icons"
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { cn } from "@/lib/utils"
-import { useNavigate, useParams } from "react-router"
+import { Link, useParams } from "react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getMySpreadsheet } from "@/lib/api/salesperson"
 import { listProducts, markSold } from "@/lib/api/products"
@@ -22,7 +28,6 @@ const statusLabel: Record<SpreadSheetStatus, string> = {
 import { formatCents } from "@/components/ui/currency-input"
 
 export const SalespersonSpreadSheet = () => {
-  const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const spreadsheetId = Number(id)
   const queryClient = useQueryClient()
@@ -56,23 +61,28 @@ export const SalespersonSpreadSheet = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => navigate(-1)}
-            aria-label="Voltar"
-          >
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </Button>
+      <div>
+        <Breadcrumb className="mb-1">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/home">Minhas Planilhas</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{spreadsheet?.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="flex justify-between items-center">
           <h1 className="text-lg text-foreground font-bold">
             {spreadsheet?.name}
           </h1>
+          <Badge className="bg-green-200 text-green-600 font-semibold">
+            {spreadsheet ? statusLabel[spreadsheet.status] : ""}
+          </Badge>
         </div>
-        <Badge className="bg-green-200 text-green-600 font-semibold">
-          {spreadsheet ? statusLabel[spreadsheet.status] : ""}
-        </Badge>
       </div>
       <hr className="-mx-4" />
       <div className="flex [&>div]:flex-1 [&>div]:pl-2 [&>div]:whitespace-nowrap [&>div:not(:first-child)]:border-l-2">

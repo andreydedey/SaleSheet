@@ -84,7 +84,7 @@ export const Dashboard = () => {
             <FontAwesomeIcon className="text-green-600" icon={faDollarSign} />
           </CardHeader>
           <CardContent className="text-3xl font-bold">
-            {stats?.totalSold ?? 0}
+            {formatCents(stats?.totalSold ?? 0)}
           </CardContent>
         </Card>
         <Card className="min-w-xs">
@@ -119,7 +119,7 @@ export const Dashboard = () => {
               <TableRow key={person.id}>
                 <TableCell>{person.name}</TableCell>
                 <TableCell>{person.email}</TableCell>
-                <TableCell>{formatCents(person.sales)}</TableCell>
+                <TableCell className="font-semibold">{formatCents(person.sales)}</TableCell>
                 <TableCell>{person.spreadsheetsCount}</TableCell>
                 <TableCell className="flex gap-2 justify-end">
                   <Button

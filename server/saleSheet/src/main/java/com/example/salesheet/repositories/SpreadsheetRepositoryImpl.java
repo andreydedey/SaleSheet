@@ -36,6 +36,10 @@ public class SpreadsheetRepositoryImpl implements SpreadsheetRepositoryCustom {
                         .when(cb.isTrue(productJoin.get("sold")), 1L)
                         .otherwise(0L)
                 ),
+                cb.sum(cb.<Long>selectCase()
+                        .when(cb.isTrue(productJoin.get("sold")), productJoin.<Long>get("price"))
+                        .otherwise(0L)
+                ),
                 root.get("status")
         ));
 

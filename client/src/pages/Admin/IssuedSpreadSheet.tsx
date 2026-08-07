@@ -29,7 +29,15 @@ import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { formatCents } from "@/components/ui/currency-input"
-import { useParams } from "react-router"
+import { Link, useParams } from "react-router"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { getSpreadsheet } from "@/lib/api/spreadsheets"
 import { listProducts, markSold, deleteProduct } from "@/lib/api/products"
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
@@ -85,6 +93,19 @@ export const IssuedSpreadSheet = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/spreadsheets">Planilhas</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{spreadsheet?.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className="flex justify-between">
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
@@ -181,7 +202,7 @@ export const IssuedSpreadSheet = () => {
                 <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
                 <TableCell>{item.definition}</TableCell>
-                <TableCell>{formatCents(item.price)}</TableCell>
+                <TableCell className="font-semibold">{formatCents(item.price)}</TableCell>
                 <TableCell>
                   <Checkbox
                     checked={item.sold}

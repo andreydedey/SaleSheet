@@ -16,5 +16,6 @@ public class SpreadSheetListDTO {
     private LocalDateTime issuedAt;
     private long totalPieces;
     private long soldPieces;
+    private long totalSold;
     private SpreadSheetStatus status;
 }
