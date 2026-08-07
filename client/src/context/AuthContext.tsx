@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react"
-import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { User } from "@/types/User"
 import { api } from "@/lib/api"
 

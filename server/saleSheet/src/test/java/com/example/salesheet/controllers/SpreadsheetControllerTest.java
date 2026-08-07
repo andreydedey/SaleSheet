@@ -42,13 +42,13 @@ class SpreadsheetControllerTest {
     @MockitoBean OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     private SpreadSheetDTO buildSpreadSheetDTO(Long id) {
-        return new SpreadSheetDTO(id, "PLN-001", LocalDateTime.now(), null, "DRAFT");
+        return new SpreadSheetDTO(id, "PLN-001", LocalDateTime.now(), null, "DRAFT", null, null);
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void listSpreadsheets_returnsPage() throws Exception {
-        var item = new SpreadSheetListDTO(1L, "PLN-001", null, 5L, 2L, SpreadSheetStatus.ACTIVE);
+        var item = new SpreadSheetListDTO(1L, "PLN-001", null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
         var page = new PageImpl<>(List.of(item), PageRequest.of(0, 20), 1);
         when(spreadsheetService.list(any(), any(), any(), any())).thenReturn(page);
 
@@ -108,7 +108,7 @@ class SpreadsheetControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void emitSpreadsheet_returnsUpdatedSpreadsheet() throws Exception {
-        var emitted = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), LocalDateTime.now(), "ACTIVE");
+        var emitted = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), LocalDateTime.now(), "ACTIVE", null, null);
         when(spreadsheetService.emit(1L)).thenReturn(emitted);
 
         mockMvc.perform(post("/spreadsheets/1/emit").with(csrf()))

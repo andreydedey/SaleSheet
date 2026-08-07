@@ -2,6 +2,7 @@ package com.example.salesheet.services;
 
 import com.example.salesheet.enums.Role;
 import com.example.salesheet.enums.SpreadSheetStatus;
+import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -18,16 +19,19 @@ class DashboardServiceTest {
 
     @Mock UserRepository userRepository;
     @Mock SpreadsheetRepository spreadsheetRepository;
+    @Mock ProductRepository productRepository;
     @InjectMocks DashboardService dashboardService;
 
     @Test
     void getStats_returnsCorrectCounts() {
         when(userRepository.countByRole(Role.SALESPERSON)).thenReturn(5L);
         when(spreadsheetRepository.countByStatus(SpreadSheetStatus.ACTIVE)).thenReturn(3L);
+        when(productRepository.sumSoldPrices()).thenReturn(150000L);
 
         var stats = dashboardService.getStats();
 
         assertThat(stats.getTotalSalespersons()).isEqualTo(5L);
         assertThat(stats.getActiveSpreadsheets()).isEqualTo(3L);
+        assertThat(stats.getTotalSold()).isEqualTo(150000L);
     }
 }

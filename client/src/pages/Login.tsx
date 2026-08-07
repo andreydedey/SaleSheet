@@ -26,10 +26,7 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   })
 
-  const apiLogin = (data: z.infer<typeof loginSchema>) => {
-    console.log("Você está muito linda prima!")
-    console.log(data)
-  }
+  const apiLogin = (_data: z.infer<typeof loginSchema>) => {}
 
   const handleGoogleLogin = () => {
     setIsLoggingIn(true)
