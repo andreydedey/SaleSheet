@@ -67,6 +67,35 @@ class ProductControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    void updateProduct_returnsOk() throws Exception {
+        var dto = new ProductDTO(null, "REF-UPD", 200L, "Calça Atualizada", false, "nota");
+        var updated = new ProductDTO(3L, "REF-UPD", 200L, "Calça Atualizada", false, "nota");
+        when(productService.updateProduct(eq(1L), eq(3L), any())).thenReturn(updated);
+
+        mockMvc.perform(patch("/spreadsheets/1/items/3")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.reference").value("REF-UPD"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateProduct_returnsNotFound_whenProductMissing() throws Exception {
+        doThrow(new ResponseStatusException(NOT_FOUND))
+                .when(productService).updateProduct(eq(1L), eq(99L), any());
+
+        mockMvc.perform(patch("/spreadsheets/1/items/99")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reference\":\"X\",\"price\":1,\"definition\":\"Y\"}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteProduct_returnsNoContent() throws Exception {
         doNothing().when(productService).deleteProduct(1L, 3L);
 
@@ -100,4 +129,30 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.sold").value(true));
     }
 
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void addNote_returnsUpdatedProduct() throws Exception {
+        var updated = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, "aguardando pagamento");
+        when(productService.addNote(eq(1L), eq(1L), eq("aguardando pagamento"))).thenReturn(updated);
+
+        mockMvc.perform(patch("/spreadsheets/1/items/1/note")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"observation\": \"aguardando pagamento\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.observation").value("aguardando pagamento"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void addNote_returnsNotFound_whenProductMissing() throws Exception {
+        doThrow(new ResponseStatusException(NOT_FOUND))
+                .when(productService).addNote(eq(1L), eq(99L), any());
+
+        mockMvc.perform(patch("/spreadsheets/1/items/99/note")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"observation\": \"test\"}"))
+                .andExpect(status().isNotFound());
+    }
 }

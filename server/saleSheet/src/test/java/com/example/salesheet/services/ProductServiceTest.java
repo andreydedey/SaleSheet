@@ -88,13 +88,15 @@ class ProductServiceTest {
         dto.setReference("REF-NEW");
         dto.setDefinition("Updated");
         dto.setPrice(200L);
-        dto.setSold(true);
         dto.setObservation("note");
 
         var result = productService.updateProduct(1L, 1L, dto);
 
+        // updateProduct sets reference, price, definition, observation — not sold
         assertThat(product.getReference()).isEqualTo("REF-NEW");
-        assertThat(product.isSold()).isTrue();
+        assertThat(product.getDefinition()).isEqualTo("Updated");
+        assertThat(product.getPrice()).isEqualTo(200L);
+        assertThat(product.getObservation()).isEqualTo("note");
         assertThat(result).isNotNull();
     }
 
@@ -118,6 +120,15 @@ class ProductServiceTest {
     }
 
     @Test
+    void markSold_throwsNotFound_whenProductMissing() {
+        when(productRepository.findByIdAndSpreadSheetId(5L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> productService.markSold(1L, 5L, true))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(NOT_FOUND);
+    }
+
+    @Test
     void markSold_updatesAndReturnsDTO() {
         var product = buildProduct(1L, 1L);
         when(productRepository.findByIdAndSpreadSheetId(1L, 1L)).thenReturn(Optional.of(product));
@@ -127,6 +138,28 @@ class ProductServiceTest {
 
         assertThat(product.isSold()).isTrue();
         verify(productRepository).save(product);
+    }
+
+    @Test
+    void markSold_unsold_setsFieldToFalse() {
+        var product = buildProduct(1L, 1L);
+        product.setSold(true);
+        when(productRepository.findByIdAndSpreadSheetId(1L, 1L)).thenReturn(Optional.of(product));
+        when(productRepository.save(any())).thenReturn(product);
+
+        productService.markSold(1L, 1L, false);
+
+        assertThat(product.isSold()).isFalse();
+        verify(productRepository).save(product);
+    }
+
+    @Test
+    void addNote_throwsNotFound_whenProductMissing() {
+        when(productRepository.findByIdAndSpreadSheetId(5L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> productService.addNote(1L, 5L, "note"))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(NOT_FOUND);
     }
 
     @Test

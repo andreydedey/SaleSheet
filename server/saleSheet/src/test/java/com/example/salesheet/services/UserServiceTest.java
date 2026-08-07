@@ -14,12 +14,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -54,5 +56,59 @@ class UserServiceTest {
                 .isEqualTo(CONFLICT);
 
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void updateSalesperson_throwsNotFound_whenUserMissing() {
+        var id = UUID.randomUUID();
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updateSalesperson(id, new InviteDTO("new@email.com", "New Name")))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(NOT_FOUND);
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void updateSalesperson_updatesNameAndEmail() {
+        var id = UUID.randomUUID();
+        var user = new User();
+        user.setId(id);
+        user.setName("Old Name");
+        user.setEmail("old@email.com");
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        userService.updateSalesperson(id, new InviteDTO("new@email.com", "New Name"));
+
+        assertThat(user.getName()).isEqualTo("New Name");
+        assertThat(user.getEmail()).isEqualTo("new@email.com");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void deleteSalesperson_throwsNotFound_whenUserMissing() {
+        var id = UUID.randomUUID();
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.deleteSalesperson(id))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(NOT_FOUND);
+
+        verify(userRepository, never()).delete(any());
+    }
+
+    @Test
+    void deleteSalesperson_deletesUser() {
+        var id = UUID.randomUUID();
+        var user = new User();
+        user.setId(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        userService.deleteSalesperson(id);
+
+        verify(userRepository).delete(user);
     }
 }

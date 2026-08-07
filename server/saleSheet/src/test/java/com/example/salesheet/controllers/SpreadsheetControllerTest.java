@@ -96,6 +96,33 @@ class SpreadsheetControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    void updateStatus_returnsUpdatedSpreadsheet() throws Exception {
+        var updated = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), null, "ACTIVE", null, null);
+        when(spreadsheetService.updateStatus(eq(1L), eq(SpreadSheetStatus.ACTIVE))).thenReturn(updated);
+
+        mockMvc.perform(patch("/spreadsheets/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\": \"ACTIVE\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateStatus_returnsNotFound_whenMissing() throws Exception {
+        doThrow(new ResponseStatusException(NOT_FOUND))
+                .when(spreadsheetService).updateStatus(eq(99L), any());
+
+        mockMvc.perform(patch("/spreadsheets/99")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\": \"ACTIVE\"}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteSpreadsheet_returnsNoContent() throws Exception {
         doNothing().when(spreadsheetService).delete(1L);
 
@@ -116,4 +143,32 @@ class SpreadsheetControllerTest {
                 .andExpect(jsonPath("$.status").value("ACTIVE"));
     }
 
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateSalesperson_returnsUpdatedSpreadsheet() throws Exception {
+        var salespersonId = UUID.randomUUID();
+        var updated = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), null, "DRAFT", salespersonId, "Carlos");
+        when(spreadsheetService.updateSalesperson(eq(1L), eq(salespersonId))).thenReturn(updated);
+
+        mockMvc.perform(patch("/spreadsheets/1/salesperson")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"salespersonId\": \"" + salespersonId + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.salespersonName").value("Carlos"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateSalesperson_returnsNotFound_whenSalespersonMissing() throws Exception {
+        var salespersonId = UUID.randomUUID();
+        doThrow(new ResponseStatusException(NOT_FOUND))
+                .when(spreadsheetService).updateSalesperson(eq(1L), eq(salespersonId));
+
+        mockMvc.perform(patch("/spreadsheets/1/salesperson")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"salespersonId\": \"" + salespersonId + "\"}"))
+                .andExpect(status().isNotFound());
+    }
 }

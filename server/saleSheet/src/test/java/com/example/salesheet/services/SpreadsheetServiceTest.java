@@ -4,6 +4,7 @@ import com.example.salesheet.dto.SpreadSheetCreateDTO;
 import com.example.salesheet.entities.SpreadSheet;
 import com.example.salesheet.entities.User;
 import com.example.salesheet.enums.SpreadSheetStatus;
+import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -22,12 +23,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @ExtendWith(MockitoExtension.class)
 class SpreadsheetServiceTest {
 
     @Mock SpreadsheetRepository spreadsheetRepository;
     @Mock UserRepository userRepository;
+    @Mock ProductRepository productRepository;
     @InjectMocks SpreadsheetService spreadsheetService;
 
     private User buildUser(UUID id) {
@@ -96,10 +99,69 @@ class SpreadsheetServiceTest {
     }
 
     @Test
+    void updateStatus_throwsNotFound_whenMissing() {
+        when(spreadsheetRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> spreadsheetService.updateStatus(99L, SpreadSheetStatus.ACTIVE))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(NOT_FOUND);
+    }
+
+    @Test
+    void updateStatus_changesStatusAndReturnsDTO() {
+        var user = buildUser(UUID.randomUUID());
+        var ss = buildSpreadsheet(1L, user, SpreadSheetStatus.DRAFT);
+        when(spreadsheetRepository.findById(1L)).thenReturn(Optional.of(ss));
+        when(spreadsheetRepository.save(any())).thenReturn(ss);
+
+        var result = spreadsheetService.updateStatus(1L, SpreadSheetStatus.ACTIVE);
+
+        assertThat(ss.getStatus()).isEqualTo(SpreadSheetStatus.ACTIVE);
+        assertThat(result.getStatus()).isEqualTo("ACTIVE");
+        verify(spreadsheetRepository).save(ss);
+    }
+
+    @Test
+    void emit_throwsNotFound_whenSpreadsheetMissing() {
+        when(spreadsheetRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> spreadsheetService.emit(99L))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(NOT_FOUND);
+    }
+
+    @Test
+    void emit_throwsUnprocessable_whenNoUser() {
+        var ss = new SpreadSheet();
+        ss.setId(1L);
+        ss.setName("PLN-001");
+        ss.setStatus(SpreadSheetStatus.DRAFT);
+        // user is null
+        when(spreadsheetRepository.findById(1L)).thenReturn(Optional.of(ss));
+
+        assertThatThrownBy(() -> spreadsheetService.emit(1L))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    void emit_throwsUnprocessable_whenNoProducts() {
+        var user = buildUser(UUID.randomUUID());
+        var ss = buildSpreadsheet(1L, user, SpreadSheetStatus.DRAFT);
+        when(spreadsheetRepository.findById(1L)).thenReturn(Optional.of(ss));
+        when(productRepository.countBySpreadSheetId(1L)).thenReturn(0L);
+
+        assertThatThrownBy(() -> spreadsheetService.emit(1L))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
     void emit_setsStatusActiveAndIssuedAt() {
         var user = buildUser(UUID.randomUUID());
         var ss = buildSpreadsheet(1L, user, SpreadSheetStatus.DRAFT);
         when(spreadsheetRepository.findById(1L)).thenReturn(Optional.of(ss));
+        when(productRepository.countBySpreadSheetId(1L)).thenReturn(3L);
         when(spreadsheetRepository.save(any())).thenReturn(ss);
 
         spreadsheetService.emit(1L);
@@ -107,6 +169,15 @@ class SpreadsheetServiceTest {
         assertThat(ss.getStatus()).isEqualTo(SpreadSheetStatus.ACTIVE);
         assertThat(ss.getIssuedAt()).isNotNull();
         verify(spreadsheetRepository).save(ss);
+    }
+
+    @Test
+    void delete_throwsNotFound_whenMissing() {
+        when(spreadsheetRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> spreadsheetService.delete(99L))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(NOT_FOUND);
     }
 
     @Test
@@ -118,6 +189,47 @@ class SpreadsheetServiceTest {
         spreadsheetService.delete(1L);
 
         verify(spreadsheetRepository).delete(ss);
+    }
+
+    @Test
+    void updateSalesperson_throwsNotFound_whenSpreadsheetMissing() {
+        var newUserId = UUID.randomUUID();
+        when(spreadsheetRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> spreadsheetService.updateSalesperson(99L, newUserId))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(NOT_FOUND);
+    }
+
+    @Test
+    void updateSalesperson_throwsNotFound_whenUserMissing() {
+        var user = buildUser(UUID.randomUUID());
+        var ss = buildSpreadsheet(1L, user, SpreadSheetStatus.DRAFT);
+        var newUserId = UUID.randomUUID();
+        when(spreadsheetRepository.findById(1L)).thenReturn(Optional.of(ss));
+        when(userRepository.findById(newUserId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> spreadsheetService.updateSalesperson(1L, newUserId))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode").isEqualTo(NOT_FOUND);
+    }
+
+    @Test
+    void updateSalesperson_assignsNewUserAndReturnsDTO() {
+        var originalUser = buildUser(UUID.randomUUID());
+        var ss = buildSpreadsheet(1L, originalUser, SpreadSheetStatus.DRAFT);
+        var newUserId = UUID.randomUUID();
+        var newUser = buildUser(newUserId);
+        newUser.setName("Carlos");
+        when(spreadsheetRepository.findById(1L)).thenReturn(Optional.of(ss));
+        when(userRepository.findById(newUserId)).thenReturn(Optional.of(newUser));
+        when(spreadsheetRepository.save(any())).thenReturn(ss);
+
+        var result = spreadsheetService.updateSalesperson(1L, newUserId);
+
+        assertThat(ss.getUser()).isEqualTo(newUser);
+        assertThat(result).isNotNull();
+        verify(spreadsheetRepository).save(ss);
     }
 
     @Test
