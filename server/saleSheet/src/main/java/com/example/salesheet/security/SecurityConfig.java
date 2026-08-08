@@ -2,6 +2,7 @@ package com.example.salesheet.security;
 
 import com.example.salesheet.services.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -26,6 +27,9 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
+    @Value("${app.url}")
+    private String appUrl;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -38,7 +42,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
-                        .failureUrl("http://127.0.0.1:5173/login?error=not_invited")
+                        .failureUrl(appUrl + "/login?error=not_invited")
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -46,7 +50,7 @@ public class SecurityConfig {
                 )
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://127.0.0.1:5173", "http://localhost:5173"));
+                    config.setAllowedOrigins(List.of(appUrl));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
