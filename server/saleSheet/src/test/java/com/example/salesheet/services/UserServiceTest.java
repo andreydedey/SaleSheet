@@ -27,6 +27,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 class UserServiceTest {
 
     @Mock UserRepository userRepository;
+    @Mock EmailService emailService;
     @InjectMocks UserService userService;
 
     @Test

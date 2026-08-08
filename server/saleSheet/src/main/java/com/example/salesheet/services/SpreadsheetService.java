@@ -11,6 +11,7 @@ import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
 import com.example.salesheet.specifications.SpreadSheetSpecifications;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SpreadsheetService {
@@ -42,6 +44,7 @@ public class SpreadsheetService {
         spreadSheet.setUser(user);
 
         spreadSheet = spreadsheetRepository.save(spreadSheet);
+        log.info("Spreadsheet created: id={}, name={}, salespersonId={}", spreadSheet.getId(), spreadSheet.getName(), dto.getSalespersonId());
         return SpreadSheetMapper.toDTO(spreadSheet);
     }
 
@@ -57,6 +60,7 @@ public class SpreadsheetService {
 
         spreadSheet.setStatus(status);
         spreadSheet = spreadsheetRepository.save(spreadSheet);
+        log.info("Spreadsheet status updated: id={}, status={}", id, status);
         return SpreadSheetMapper.toDTO(spreadSheet);
     }
 
@@ -64,6 +68,7 @@ public class SpreadsheetService {
         var spreadSheet = spreadsheetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));
         spreadsheetRepository.delete(spreadSheet);
+        log.info("Spreadsheet deleted: id={}", id);
     }
 
     public SpreadSheetDTO emit(Long id) {
@@ -82,6 +87,7 @@ public class SpreadsheetService {
         spreadSheet.setStatus(SpreadSheetStatus.ACTIVE);
         spreadSheet.setIssuedAt(LocalDateTime.now());
         spreadSheet = spreadsheetRepository.save(spreadSheet);
+        log.info("Spreadsheet emitted: id={}, salespersonId={}, products={}", id, spreadSheet.getUser().getId(), productCount);
         return SpreadSheetMapper.toDTO(spreadSheet);
     }
 

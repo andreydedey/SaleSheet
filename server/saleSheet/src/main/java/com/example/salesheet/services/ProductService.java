@@ -5,6 +5,7 @@ import com.example.salesheet.mappers.ProductMapper;
 import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -30,6 +32,7 @@ public class ProductService {
 
         var product = ProductMapper.toEntity(dto, spreadSheet);
         product = productRepository.save(product);
+        log.info("Product added: id={}, reference={}, spreadsheetId={}", product.getId(), product.getReference(), spreadsheetId);
         return ProductMapper.toDTO(product);
     }
 
@@ -50,6 +53,7 @@ public class ProductService {
         var product = productRepository.findByIdAndSpreadSheetId(productId, spreadsheetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
         productRepository.delete(product);
+        log.info("Product deleted: id={}, spreadsheetId={}", productId, spreadsheetId);
     }
 
     public ProductDTO markSold(Long spreadsheetId, Long productId, boolean sold) {
@@ -58,6 +62,7 @@ public class ProductService {
 
         product.setSold(sold);
         product = productRepository.save(product);
+        log.info("Product marked {}: id={}, spreadsheetId={}", sold ? "sold" : "unsold", productId, spreadsheetId);
         return ProductMapper.toDTO(product);
     }
 
