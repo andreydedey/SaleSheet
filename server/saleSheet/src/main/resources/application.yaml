@@ -17,9 +17,9 @@ spring:
               - email
               - profile
   datasource:
-    url: jdbc:${DATABASE_URL}
-    username: ${PGUSER}
-    password: ${PGPASSWORD}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/salesheet}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
   flyway:
     baseline-on-migrate: true
     baseline-version: 1
