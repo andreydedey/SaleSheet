@@ -1,4 +1,5 @@
 import axios from "axios"
+import { toast } from "sonner"
 
 export const api = axios.create({
   baseURL: "http://127.0.0.1:8080",
@@ -14,3 +15,13 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 500) {
+      toast.error("Erro interno do servidor. Tente novamente mais tarde.")
+    }
+    return Promise.reject(error)
+  }
+)
