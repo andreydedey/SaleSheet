@@ -15,7 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("""
             SELECT new com.example.salesheet.dto.ProductDTO(
-                p.id, p.reference, p.price, p.definition, p.sold, p.observation
+                p.id, p.reference, p.price, p.definition, p.sold, p.observation, p.observationUpdatedAt
             )
             FROM Product p
             WHERE p.spreadSheet.id = :spreadSheetId

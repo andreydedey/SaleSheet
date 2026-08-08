@@ -2,13 +2,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
   Table,
   TableBody,
   TableCell,
@@ -20,10 +13,9 @@ import {
   faCircleCheck,
   faCircleXmark,
   faEdit,
-  faMessage,
   faTrashCan,
 } from "@fortawesome/free-regular-svg-icons"
-import { faBoxOpen, faDollarSign } from "@fortawesome/free-solid-svg-icons"
+import { faBoxOpen, faDollarSign, faCircleExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
 import { InactivateSpreadsheetDialog } from "@/components/InactivateSpreadsheetDialog"
@@ -43,6 +35,7 @@ import {
 import { getSpreadsheet } from "@/lib/api/spreadsheets"
 import { listProducts, markSold, deleteProduct } from "@/lib/api/products"
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
+import { ObservationPopover } from "@/components/ObservationPopover"
 import { useState } from "react"
 import type { ProductDTO } from "@/types/api"
 
@@ -126,6 +119,7 @@ export const IssuedSpreadSheet = () => {
               ? new Date(spreadsheet.issuedAt).toLocaleDateString("pt-BR")
               : "-"}{" "}
             · {totalPieces} peças
+            {spreadsheet?.status === "INACTIVE" && " · Inativa"}
           </h3>
         </div>
         {spreadsheet?.status === "ACTIVE" ? (
@@ -140,6 +134,15 @@ export const IssuedSpreadSheet = () => {
           />
         )}
       </div>
+      {spreadsheet?.status === "INACTIVE" && (
+        <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <FontAwesomeIcon icon={faCircleExclamation} className="text-red-500 text-lg shrink-0" />
+          <div>
+            <p className="font-semibold text-red-700 text-sm">Esta planilha está inativa</p>
+            <p className="text-red-600 text-sm">A revendedora não pode registrar vendas.</p>
+          </div>
+        </div>
+      )}
       <div className="flex gap-4 *:flex-1">
         <Card>
           <CardContent className="flex items-center gap-4">
@@ -243,30 +246,7 @@ export const IssuedSpreadSheet = () => {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {item.observation && (
-                    <Popover>
-                      <PopoverTrigger>
-                        <FontAwesomeIcon
-                          className="text-green-600"
-                          icon={faMessage}
-                        />
-                      </PopoverTrigger>
-                      <PopoverContent className=" max-w-52">
-                        <PopoverTitle>
-                          <FontAwesomeIcon
-                            className="text-green-600 mr-1.5"
-                            icon={faMessage}
-                          />
-                          Observação:
-                        </PopoverTitle>
-                        <hr />
-                        {item.observation}
-                        <PopoverDescription className="text-xs">
-                          {item.reference} · {item.definition}
-                        </PopoverDescription>
-                      </PopoverContent>
-                    </Popover>
-                  )}
+                  <ObservationPopover spreadsheetId={spreadsheetId} product={item} />
                 </TableCell>
                 <TableCell className="space-x-2 text-base w-px whitespace-nowrap">
                   <FontAwesomeIcon

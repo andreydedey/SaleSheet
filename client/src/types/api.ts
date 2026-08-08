@@ -38,6 +38,7 @@ export type ProductDTO = {
   definition: string
   sold: boolean
   observation: string | null
+  observationUpdatedAt: string | null
 }
 
 export type DashboardDTO = {

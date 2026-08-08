@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "products")
 @Getter
@@ -23,6 +25,8 @@ public class Product {
     private boolean sold = false;
 
     private String observation;
+
+    private LocalDateTime observationUpdatedAt;
 
     @ManyToOne
     private SpreadSheet spreadSheet;

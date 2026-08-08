@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -63,7 +65,9 @@ public class ProductService {
         var product = productRepository.findByIdAndSpreadSheetId(productId, spreadsheetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        product.setObservation(observation);
+        boolean clearing = observation == null || observation.isBlank();
+        product.setObservation(clearing ? null : observation);
+        product.setObservationUpdatedAt(clearing ? null : LocalDateTime.now());
         product = productRepository.save(product);
         return ProductMapper.toDTO(product);
     }

@@ -39,7 +39,7 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void getProducts_returnsPageOfProducts() throws Exception {
-        var product = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, null);
+        var product = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, null, null);
         var page = new PageImpl<>(List.of(product), PageRequest.of(0, 20), 1);
         when(productService.getProducts(eq(1L), any())).thenReturn(page);
 
@@ -52,8 +52,8 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void addProduct_returnsCreated() throws Exception {
-        var dto = new ProductDTO(null, "REF-002", 150L, "Calça", false, null);
-        var saved = new ProductDTO(2L, "REF-002", 150L, "Calça", false, null);
+        var dto = new ProductDTO(null, "REF-002", 150L, "Calça", false, null, null);
+        var saved = new ProductDTO(2L, "REF-002", 150L, "Calça", false, null, null);
         when(productService.addProduct(eq(1L), any())).thenReturn(saved);
 
         mockMvc.perform(post("/spreadsheets/1/items")
@@ -68,8 +68,8 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateProduct_returnsOk() throws Exception {
-        var dto = new ProductDTO(null, "REF-UPD", 200L, "Calça Atualizada", false, "nota");
-        var updated = new ProductDTO(3L, "REF-UPD", 200L, "Calça Atualizada", false, "nota");
+        var dto = new ProductDTO(null, "REF-UPD", 200L, "Calça Atualizada", false, "nota", null);
+        var updated = new ProductDTO(3L, "REF-UPD", 200L, "Calça Atualizada", false, "nota", null);
         when(productService.updateProduct(eq(1L), eq(3L), any())).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1/items/3")
@@ -118,7 +118,7 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void markSold_returnsUpdatedProduct() throws Exception {
-        var updated = new ProductDTO(1L, "REF-001", 100L, "Blusa", true, null);
+        var updated = new ProductDTO(1L, "REF-001", 100L, "Blusa", true, null, null);
         when(productService.markSold(eq(1L), eq(1L), eq(true))).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1/items/1/sold")
@@ -132,7 +132,7 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void addNote_returnsUpdatedProduct() throws Exception {
-        var updated = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, "aguardando pagamento");
+        var updated = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, "aguardando pagamento", null);
         when(productService.addNote(eq(1L), eq(1L), eq("aguardando pagamento"))).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1/items/1/note")

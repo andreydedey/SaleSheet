@@ -14,6 +14,7 @@ public class ProductMapper {
         dto.setDefinition(entity.getDefinition());
         dto.setSold(entity.isSold());
         dto.setObservation(entity.getObservation());
+        dto.setObservationUpdatedAt(entity.getObservationUpdatedAt());
         return dto;
     }
 
