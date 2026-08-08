@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { CannotDeleteSalespersonDialog } from "@/components/CannotDeleteSalespersonDialog"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getStats, getSalespersons } from "@/lib/api/dashboard"
 import { InviteDialog, InviteButton } from "@/components/InviteDialog"
@@ -32,6 +33,7 @@ export const Dashboard = () => {
   const queryClient = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingSalesperson, setEditingSalesperson] = useState<SalespersonDTO | undefined>()
+  const [conflictWarning, setConflictWarning] = useState(false)
 
   const { data: stats } = useQuery({
     queryKey: ["dashboard", "stats"],
@@ -49,7 +51,13 @@ export const Dashboard = () => {
       toast.success("Revendedor removido.")
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
-    onError: () => toast.error("Erro ao remover revendedor."),
+    onError: (error: any) => {
+      if (error?.response?.status === 409) {
+        setConflictWarning(true)
+      } else {
+        toast.error("Erro ao remover revendedor.")
+      }
+    },
   })
 
   const invalidate = () =>
@@ -154,6 +162,10 @@ export const Dashboard = () => {
         onOpenChange={setDialogOpen}
         salesperson={editingSalesperson}
         onSuccess={invalidate}
+      />
+      <CannotDeleteSalespersonDialog
+        open={conflictWarning}
+        onOpenChange={setConflictWarning}
       />
     </>
   )

@@ -7,6 +7,7 @@ import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ public class DashboardService {
     private final SpreadsheetRepository spreadsheetRepository;
     private final ProductRepository productRepository;
 
+    @Transactional(readOnly = true)
     public DashboardDTO getStats() {
         long totalSalespersons = userRepository.countByRole(Role.SALESPERSON);
         long activeSpreadsheets = spreadsheetRepository.countByStatus(SpreadSheetStatus.ACTIVE);
@@ -27,6 +29,7 @@ public class DashboardService {
         return new DashboardDTO(totalSalespersons, totalSold, activeSpreadsheets);
     }
 
+    @Transactional(readOnly = true)
     public Page<SalespersonDTO> listSalespersons(Pageable pageable) {
         return userRepository.findAllSalespersonStats(pageable);
     }

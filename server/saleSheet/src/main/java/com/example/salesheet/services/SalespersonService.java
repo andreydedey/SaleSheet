@@ -5,6 +5,7 @@ import com.example.salesheet.entities.SpreadSheet;
 import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.specifications.SpreadSheetSpecifications;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class SalespersonService {
 
     private final SpreadsheetRepository spreadsheetRepository;
 
+    @Transactional(readOnly = true)
     public SalespersonStatsDTO getStats(UUID userId) {
         var spec = SpreadSheetSpecifications.hasUser(userId)
                 .and(SpreadSheetSpecifications.isNotDraft());

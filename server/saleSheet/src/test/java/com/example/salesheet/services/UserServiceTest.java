@@ -4,6 +4,7 @@ import com.example.salesheet.dto.InviteDTO;
 import com.example.salesheet.entities.User;
 import com.example.salesheet.enums.Role;
 import com.example.salesheet.enums.Status;
+import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 class UserServiceTest {
 
     @Mock UserRepository userRepository;
+    @Mock SpreadsheetRepository spreadsheetRepository;
     @Mock EmailService emailService;
     @InjectMocks UserService userService;
 
@@ -107,9 +109,25 @@ class UserServiceTest {
         var user = new User();
         user.setId(id);
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        when(spreadsheetRepository.countByUserIdAndStatusNot(eq(id), any())).thenReturn(0L);
 
         userService.deleteSalesperson(id);
 
+        verify(spreadsheetRepository).deleteAllByUserId(id);
         verify(userRepository).delete(user);
+    }
+
+    @Test
+    void deleteSalesperson_throwsConflict_whenHasActiveOrDraftSpreadsheets() {
+        var id = UUID.randomUUID();
+        var user = new User();
+        user.setId(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        when(spreadsheetRepository.countByUserIdAndStatusNot(eq(id), any())).thenReturn(2L);
+
+        assertThatThrownBy(() -> userService.deleteSalesperson(id))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(e -> ((ResponseStatusException) e).getStatusCode().value())
+                .isEqualTo(409);
     }
 }

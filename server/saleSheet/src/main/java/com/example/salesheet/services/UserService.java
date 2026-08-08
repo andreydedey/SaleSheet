@@ -4,7 +4,10 @@ import com.example.salesheet.dto.InviteDTO;
 import com.example.salesheet.entities.User;
 import com.example.salesheet.enums.Role;
 import com.example.salesheet.enums.Status;
+import com.example.salesheet.enums.SpreadSheetStatus;
+import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final SpreadsheetRepository spreadsheetRepository;
     private final EmailService emailService;
 
     public void inviteSalesperson(InviteDTO dto) {
@@ -46,9 +50,16 @@ public class UserService {
         log.info("Salesperson updated: id={}, name={}, email={}", id, dto.getName(), dto.getEmail());
     }
 
+    @Transactional
     public void deleteSalesperson(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Salesperson not found"));
+
+        if (spreadsheetRepository.countByUserIdAndStatusNot(id, SpreadSheetStatus.INACTIVE) > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Salesperson has active or draft spreadsheets and cannot be deleted");
+        }
+
+        spreadsheetRepository.deleteAllByUserId(id);
         userRepository.delete(user);
         log.info("Salesperson deleted: id={}", id);
     }

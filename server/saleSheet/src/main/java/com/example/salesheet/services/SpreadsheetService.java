@@ -10,6 +10,7 @@ import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.repositories.UserRepository;
 import com.example.salesheet.specifications.SpreadSheetSpecifications;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ public class SpreadsheetService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
+    @Transactional(readOnly = true)
     public Page<SpreadSheetListDTO> list(UUID salespersonId, SpreadSheetStatus status, String name, Pageable pageable) {
         var spec = SpreadSheetSpecifications.buildSpec(salespersonId, status, name);
         return spreadsheetRepository.findAllAsListDTO(spec, pageable);
@@ -48,6 +50,7 @@ public class SpreadsheetService {
         return SpreadSheetMapper.toDTO(spreadSheet);
     }
 
+    @Transactional(readOnly = true)
     public SpreadSheetDTO getById(Long id) {
         var spreadSheet = spreadsheetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));
@@ -101,6 +104,7 @@ public class SpreadsheetService {
         return SpreadSheetMapper.toDTO(spreadSheet);
     }
 
+    @Transactional(readOnly = true)
     public SpreadSheetDTO getByIdForUser(Long id, UUID userId) {
         var spreadSheet = spreadsheetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));

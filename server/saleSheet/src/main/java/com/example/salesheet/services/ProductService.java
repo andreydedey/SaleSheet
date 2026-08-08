@@ -4,6 +4,7 @@ import com.example.salesheet.dto.ProductDTO;
 import com.example.salesheet.mappers.ProductMapper;
 import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final SpreadsheetRepository spreadsheetRepository;
 
+    @Transactional(readOnly = true)
     public Page<ProductDTO> getProducts(Long spreadsheetId, Pageable pageable) {
         return productRepository.findProductsBySpreadSheetId(spreadsheetId, pageable);
     }
