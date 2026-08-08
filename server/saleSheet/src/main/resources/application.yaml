@@ -17,7 +17,7 @@ spring:
               - email
               - profile
   datasource:
-    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    url: jdbc:${DATABASE_URL}
     username: ${PGUSER}
     password: ${PGPASSWORD}
   flyway:
