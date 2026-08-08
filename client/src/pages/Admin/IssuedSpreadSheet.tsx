@@ -217,7 +217,7 @@ export const IssuedSpreadSheet = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((item, index) => (
+            {products.map((item, _index) => (
               <TableRow key={item.id} className={item.sold ? "bg-green-50 hover:bg-green-50" : ""}>
                 <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
