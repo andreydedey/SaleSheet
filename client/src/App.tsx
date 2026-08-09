@@ -11,6 +11,7 @@ import { IssuedSpreadSheet } from "./pages/Admin/IssuedSpreadSheet"
 import { SalespersonLayout } from "./layout/SalespersonLayout"
 import { Home } from "./pages/Salesperson/Home"
 import { SalespersonSpreadSheet } from "./pages/Salesperson/SalespersonSpreadSheet"
+import { NotFound } from "./pages/NotFound"
 
 function PublicRoute() {
   const { user, loading } = useAuth()
@@ -41,10 +42,8 @@ export default function App() {
             <Route path="spreadsheets/:id" element={<SalespersonSpreadSheet />} />
           </Route>
         </Route>
-        <Route
-          path="/"
-          element={<ProtectedRoleRedirect />}
-        />
+        <Route path="/" element={<ProtectedRoleRedirect />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )
