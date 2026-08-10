@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   })
 
   const login = () => {
-    window.location.href = "http://127.0.0.1:8080/api/oauth2/authorization/google"
+    window.location.href = `${import.meta.env.VITE_API_URL}/oauth2/authorization/google`
   }
 
   const logout = () => {
