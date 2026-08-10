@@ -3,6 +3,7 @@ server:
     context-path: /api
     session:
       timeout: 8h
+  forward-headers-strategy: framework
 spring:
   application:
     name: saleSheet
