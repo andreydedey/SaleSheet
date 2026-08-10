@@ -20,6 +20,7 @@ spring:
             scope:
               - email
               - profile
+            redirect-uri: "${APP_URL}/api/login/oauth2/code/google"
   datasource:
     url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:salesheet}
     username: ${PGUSER:postgres}
