@@ -3,6 +3,9 @@ server:
     context-path: /api
     session:
       timeout: 8h
+      cookie:
+        same-site: none
+        secure: true
   forward-headers-strategy: framework
 spring:
   application:
