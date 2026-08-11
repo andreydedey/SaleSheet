@@ -1,10 +1,9 @@
 import { api } from "@/lib/api"
 import type {
   SpreadSheetDTO,
-  SpreadSheetListDTO,
   SpreadSheetStatus,
   SalespersonStatsDTO,
-  Page,
+  SpreadSheetPageDTO,
 } from "@/types/api"
 
 type ListParams = {
@@ -16,9 +15,7 @@ type ListParams = {
 
 export function getMySpreadsheets(params: ListParams = {}) {
   return api
-    .get<Page<SpreadSheetListDTO>>("/api/salesperson/spreadsheets", {
-      params,
-    })
+    .get<SpreadSheetPageDTO>("/api/salesperson/spreadsheets", { params })
     .then((r) => r.data)
 }
 

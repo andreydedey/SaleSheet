@@ -8,6 +8,28 @@ export type Page<T> = {
   last: boolean
 }
 
+export type SpreadSheetPageDTO = {
+  content: SpreadSheetListDTO[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
+  totalCount: number
+  activeCount: number
+  inactiveCount: number
+}
+
+export type ProductPageDTO = {
+  content: ProductDTO[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
+  totalCount: number
+  soldCount: number
+  unsoldCount: number
+}
+
 export type SpreadSheetStatus = "DRAFT" | "ACTIVE" | "INACTIVE"
 
 export type SpreadSheetListDTO = {

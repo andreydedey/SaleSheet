@@ -1,15 +1,14 @@
 import { api } from "@/lib/api"
-import type { ProductDTO, Page } from "@/types/api"
+import type { ProductDTO, ProductPageDTO } from "@/types/api"
 
 export function listProducts(
   spreadsheetId: number,
-  page = 0,
-  size = 20,
+  params: { page?: number; size?: number; sold?: boolean } = {},
 ) {
   return api
-    .get<Page<ProductDTO>>(
+    .get<ProductPageDTO>(
       `/api/spreadsheets/${spreadsheetId}/items`,
-      { params: { page, size } },
+      { params: { page: 0, size: 100, ...params } },
     )
     .then((r) => r.data)
 }
