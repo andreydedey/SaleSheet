@@ -1,6 +1,7 @@
 package com.example.salesheet.controllers;
 
 import com.example.salesheet.dto.ProductDTO;
+import com.example.salesheet.dto.ProductPageDTO;
 import com.example.salesheet.services.CustomOAuth2UserService;
 import com.example.salesheet.security.OAuth2LoginSuccessHandler;
 import com.example.salesheet.services.ProductService;
@@ -8,8 +9,6 @@ import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -40,8 +39,8 @@ class ProductControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getProducts_returnsPageOfProducts() throws Exception {
         var product = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, null, null);
-        var page = new PageImpl<>(List.of(product), PageRequest.of(0, 20), 1);
-        when(productService.getProducts(eq(1L), any())).thenReturn(page);
+        var page = new ProductPageDTO(List.of(product), 1, 1, 0, 20, 1, 0, 1);
+        when(productService.getProducts(eq(1L), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/spreadsheets/1/items"))
                 .andExpect(status().isOk())

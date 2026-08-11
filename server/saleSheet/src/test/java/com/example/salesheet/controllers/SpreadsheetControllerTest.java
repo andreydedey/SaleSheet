@@ -3,6 +3,7 @@ package com.example.salesheet.controllers;
 import com.example.salesheet.dto.SpreadSheetCreateDTO;
 import com.example.salesheet.dto.SpreadSheetDTO;
 import com.example.salesheet.dto.SpreadSheetListDTO;
+import com.example.salesheet.dto.SpreadSheetPageDTO;
 import com.example.salesheet.services.CustomOAuth2UserService;
 import com.example.salesheet.security.OAuth2LoginSuccessHandler;
 import com.example.salesheet.services.SpreadsheetService;
@@ -10,8 +11,6 @@ import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -49,7 +48,7 @@ class SpreadsheetControllerTest {
     @WithMockUser(roles = "ADMIN")
     void listSpreadsheets_returnsPage() throws Exception {
         var item = new SpreadSheetListDTO(1L, "PLN-001", "Ana Silva", null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
-        var page = new PageImpl<>(List.of(item), PageRequest.of(0, 20), 1);
+        var page = new SpreadSheetPageDTO(List.of(item), 1, 1, 0, 20, 1, 1, 0);
         when(spreadsheetService.list(any(), any(), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/spreadsheets"))
