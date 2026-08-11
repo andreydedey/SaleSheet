@@ -3,9 +3,9 @@ package com.example.salesheet.controllers;
 import com.example.salesheet.dto.AddNoteDTO;
 import com.example.salesheet.dto.MarkSoldDTO;
 import com.example.salesheet.dto.ProductDTO;
+import com.example.salesheet.dto.ProductPageDTO;
 import com.example.salesheet.services.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,23 +15,28 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/spreadsheets/{spreadsheetId}/items")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class ProductController {
 
     private final ProductService productService;
 
     @GetMapping
-    public Page<ProductDTO> getProducts(@PathVariable Long spreadsheetId, Pageable pageable) {
-        return productService.getProducts(spreadsheetId, pageable);
+    @PreAuthorize("hasRole('SALESPERSON')")
+    public ProductPageDTO getProducts(
+            @PathVariable Long spreadsheetId,
+            @RequestParam(required = false) Boolean sold,
+            Pageable pageable) {
+        return productService.getProducts(spreadsheetId, sold, pageable);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductDTO> addProduct(@PathVariable Long spreadsheetId, @RequestBody ProductDTO dto) {
         var product = productService.addProduct(spreadsheetId, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
 
     @PatchMapping("/{itemId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long spreadsheetId,
             @PathVariable Long itemId,
@@ -40,12 +45,14 @@ public class ProductController {
     }
 
     @DeleteMapping("/{itemId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long spreadsheetId, @PathVariable Long itemId) {
         productService.deleteProduct(spreadsheetId, itemId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{itemId}/sold")
+    @PreAuthorize("hasRole('SALESPERSON')")
     public ResponseEntity<ProductDTO> markSold(
             @PathVariable Long spreadsheetId,
             @PathVariable Long itemId,
@@ -54,6 +61,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{itemId}/note")
+    @PreAuthorize("hasRole('SALESPERSON')")
     public ResponseEntity<ProductDTO> addNote(
             @PathVariable Long spreadsheetId,
             @PathVariable Long itemId,

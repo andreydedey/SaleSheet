@@ -2,13 +2,12 @@ package com.example.salesheet.controllers;
 
 import com.example.salesheet.dto.SpreadSheetCreateDTO;
 import com.example.salesheet.dto.SpreadSheetDTO;
-import com.example.salesheet.dto.SpreadSheetListDTO;
+import com.example.salesheet.dto.SpreadSheetPageDTO;
 import com.example.salesheet.dto.UpdateSalespersonDTO;
 import com.example.salesheet.dto.UpdateStatusDTO;
 import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.services.SpreadsheetService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ public class SpreadsheetController {
     private final SpreadsheetService spreadsheetService;
 
     @GetMapping
-    public Page<SpreadSheetListDTO> list(
+    public SpreadSheetPageDTO list(
             @RequestParam(required = false) UUID salespersonId,
             @RequestParam(required = false) SpreadSheetStatus status,
             @RequestParam(required = false) String name,
