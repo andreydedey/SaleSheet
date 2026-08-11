@@ -1,19 +1,24 @@
 package com.example.salesheet.services;
 
 import com.example.salesheet.dto.ProductDTO;
+import com.example.salesheet.dto.ProductPageDTO;
 import com.example.salesheet.mappers.ProductMapper;
 import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
+import com.example.salesheet.specifications.ProductSpecifications;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -24,8 +29,33 @@ public class ProductService {
     private final SpreadsheetRepository spreadsheetRepository;
 
     @Transactional(readOnly = true)
-    public Page<ProductDTO> getProducts(Long spreadsheetId, Pageable pageable) {
-        return productRepository.findProductsBySpreadSheetId(spreadsheetId, pageable);
+    public ProductPageDTO getProducts(Long spreadsheetId, Boolean sold, Pageable pageable) {
+        var listSpec = ProductSpecifications.build(spreadsheetId, sold);
+        var sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.isPaged() ? pageable.getPageSize() : Integer.MAX_VALUE,
+                Sort.by("id").ascending()
+        );
+        var page = productRepository.findAll(listSpec, sortedPageable).map(ProductMapper::toDTO);
+
+        Map<Boolean, Long> countsMap = new HashMap<>();
+        productRepository.countGroupBySold(spreadsheetId)
+                .forEach(row -> countsMap.put((Boolean) row[0], (Long) row[1]));
+
+        long soldCount = countsMap.getOrDefault(true, 0L);
+        long unsoldCount = countsMap.getOrDefault(false, 0L);
+        long totalCount = soldCount + unsoldCount;
+
+        return new ProductPageDTO(
+                page.getContent(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber(),
+                page.getSize(),
+                totalCount,
+                soldCount,
+                unsoldCount
+        );
     }
 
     public ProductDTO addProduct(Long spreadsheetId, ProductDTO dto) {

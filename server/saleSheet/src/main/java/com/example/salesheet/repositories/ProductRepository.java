@@ -5,13 +5,16 @@ import com.example.salesheet.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
     @Query("""
             SELECT new com.example.salesheet.dto.ProductDTO(
@@ -29,4 +32,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT COALESCE(SUM(p.price), 0) FROM Product p WHERE p.sold = true")
     long sumSoldPrices();
+
+    @Query("""
+            SELECT p.sold, COUNT(p)
+            FROM Product p
+            WHERE p.spreadSheet.id = :spreadsheetId
+            GROUP BY p.sold
+            """)
+    List<Object[]> countGroupBySold(@Param("spreadsheetId") Long spreadsheetId);
 }
