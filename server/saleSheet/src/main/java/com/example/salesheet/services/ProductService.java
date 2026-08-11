@@ -2,6 +2,7 @@ package com.example.salesheet.services;
 
 import com.example.salesheet.dto.ProductDTO;
 import com.example.salesheet.dto.ProductPageDTO;
+import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.mappers.ProductMapper;
 import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
@@ -92,6 +93,10 @@ public class ProductService {
         var product = productRepository.findByIdAndSpreadSheetId(productId, spreadsheetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
+        if (product.getSpreadSheet().getStatus() != SpreadSheetStatus.ACTIVE) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Spreadsheet is not active");
+        }
+
         product.setSold(sold);
         product = productRepository.save(product);
         log.info("Product marked {}: id={}, spreadsheetId={}", sold ? "sold" : "unsold", productId, spreadsheetId);
@@ -101,6 +106,10 @@ public class ProductService {
     public ProductDTO addNote(Long spreadsheetId, Long productId, String observation) {
         var product = productRepository.findByIdAndSpreadSheetId(productId, spreadsheetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+        if (product.getSpreadSheet().getStatus() != SpreadSheetStatus.ACTIVE) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Spreadsheet is not active");
+        }
 
         boolean clearing = observation == null || observation.isBlank();
         product.setObservation(clearing ? null : observation);

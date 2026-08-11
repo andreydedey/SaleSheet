@@ -31,8 +31,8 @@ public class SpreadsheetService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public SpreadSheetPageDTO list(UUID salespersonId, SpreadSheetStatus status, String name, Pageable pageable) {
-        var listSpec = SpreadSheetSpecifications.buildSpec(salespersonId, status, name);
+    public SpreadSheetPageDTO list(UUID salespersonId, SpreadSheetStatus status, String name, boolean excludeDraft, Pageable pageable) {
+        var listSpec = SpreadSheetSpecifications.buildSpec(salespersonId, status, name, excludeDraft);
         return spreadsheetRepository.findAllWithCounts(listSpec, salespersonId, pageable);
     }
 

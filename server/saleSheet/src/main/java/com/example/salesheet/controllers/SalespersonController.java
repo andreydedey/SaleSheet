@@ -1,14 +1,11 @@
 package com.example.salesheet.controllers;
 
 import com.example.salesheet.dto.SpreadSheetDTO;
-import com.example.salesheet.dto.SpreadSheetPageDTO;
 import com.example.salesheet.dto.SalespersonStatsDTO;
-import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.security.CustomUserPrincipal;
 import com.example.salesheet.services.SalespersonService;
 import com.example.salesheet.services.SpreadsheetService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,15 +19,6 @@ public class SalespersonController {
 
     private final SpreadsheetService spreadsheetService;
     private final SalespersonService salespersonService;
-
-    @GetMapping("/spreadsheets")
-    public SpreadSheetPageDTO getSpreadsheets(
-            @AuthenticationPrincipal CustomUserPrincipal principal,
-            @RequestParam(required = false) SpreadSheetStatus status,
-            @RequestParam(required = false) String name,
-            Pageable pageable) {
-        return spreadsheetService.list(principal.getUser().getId(), status, name, pageable);
-    }
 
     @GetMapping("/spreadsheets/{id}")
     public ResponseEntity<SpreadSheetDTO> getSpreadsheet(

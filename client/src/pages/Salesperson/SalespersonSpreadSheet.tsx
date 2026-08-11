@@ -72,6 +72,8 @@ export const SalespersonSpreadSheet = () => {
     setObservationDraft("")
   }
 
+  const isReadOnly = spreadsheet?.status !== "ACTIVE"
+
   const products = productsPage?.content ?? []
   const totalPieces = productsPage?.totalCount ?? 0
   const soldPieces = productsPage?.soldCount ?? 0
@@ -181,31 +183,39 @@ export const SalespersonSpreadSheet = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => openObservation(item.id, item.observation)}
-                    className={cn(
-                      "size-9 rounded-lg flex items-center justify-center transition-colors",
-                      isEditing
-                        ? "bg-green-500 text-white"
-                        : item.observation
-                          ? "bg-green-100 text-green-600"
-                          : "bg-transparent border border-border text-muted-foreground",
-                    )}
-                  >
-                    <FontAwesomeIcon
-                      icon={isEditing ? faMessageSolid : faMessage}
-                      className="text-sm"
-                    />
-                  </button>
+                  {!isReadOnly && (
+                    <button
+                      onClick={() => openObservation(item.id, item.observation)}
+                      className={cn(
+                        "size-9 rounded-lg flex items-center justify-center transition-colors",
+                        isEditing
+                          ? "bg-green-500 text-white"
+                          : item.observation
+                            ? "bg-green-100 text-green-600"
+                            : "bg-transparent border border-border text-muted-foreground",
+                      )}
+                    >
+                      <FontAwesomeIcon
+                        icon={isEditing ? faMessageSolid : faMessage}
+                        className="text-sm"
+                      />
+                    </button>
+                  )}
+                  {item.observation && isReadOnly && (
+                    <div className="size-9 rounded-lg flex items-center justify-center bg-green-100 text-green-600">
+                      <FontAwesomeIcon icon={faMessage} className="text-sm" />
+                    </div>
+                  )}
                   <Checkbox
                     checked={item.sold}
+                    disabled={isReadOnly}
                     onCheckedChange={(checked) =>
                       markSoldMutation.mutate({
                         itemId: item.id,
                         sold: checked === true,
                       })
                     }
-                    className="size-8 border-2 data-checked:border-green-600 data-checked:bg-green-600 data-checked:text-white *:data-[slot=checkbox-indicator]:[&>svg]:size-5!"
+                    className="size-8 border-2 data-checked:border-green-600 data-checked:bg-green-600 data-checked:text-white *:data-[slot=checkbox-indicator]:[&>svg]:size-5! disabled:opacity-50"
                   />
                 </div>
               </div>

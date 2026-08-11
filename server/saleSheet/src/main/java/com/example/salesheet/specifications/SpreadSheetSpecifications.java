@@ -25,8 +25,15 @@ public class SpreadSheetSpecifications {
     }
 
     public static Specification<SpreadSheet> buildSpec(UUID salespersonId, SpreadSheetStatus status, String name) {
+        return buildSpec(salespersonId, status, name, false);
+    }
+
+    public static Specification<SpreadSheet> buildSpec(UUID salespersonId, SpreadSheetStatus status, String name, boolean excludeDraft) {
         Specification<SpreadSheet> spec = (root, query, cb) -> cb.conjunction();
 
+        if (excludeDraft) {
+            spec = spec.and(isNotDraft());
+        }
         if (salespersonId != null) {
             spec = spec.and(hasUser(salespersonId));
         }

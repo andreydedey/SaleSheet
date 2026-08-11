@@ -15,7 +15,7 @@ type ListParams = {
 
 export function getMySpreadsheets(params: ListParams = {}) {
   return api
-    .get<SpreadSheetPageDTO>("/api/salesperson/spreadsheets", { params })
+    .get<SpreadSheetPageDTO>("/api/spreadsheets", { params })
     .then((r) => r.data)
 }
 
