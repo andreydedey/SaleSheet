@@ -49,7 +49,7 @@ class SpreadsheetControllerTest {
     void listSpreadsheets_returnsPage() throws Exception {
         var item = new SpreadSheetListDTO(1L, "PLN-001", "Ana Silva", null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
         var page = new SpreadSheetPageDTO(List.of(item), 1, 1, 0, 20, 1, 1, 0);
-        when(spreadsheetService.list(any(), any(), any(), any())).thenReturn(page);
+        when(spreadsheetService.list(any(), any(), any(), anyBoolean(), any())).thenReturn(page);
 
         mockMvc.perform(get("/spreadsheets"))
                 .andExpect(status().isOk())
