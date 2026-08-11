@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faGoogle } from "@fortawesome/free-brands-svg-icons"
-import { faStar } from "@fortawesome/free-regular-svg-icons"
 import { faSpinner } from "@fortawesome/free-solid-svg-icons"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,24 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Controller, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import type z from "zod"
-import { loginSchema } from "@/schemas/loginSchema"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/AuthContext"
 import { useState } from "react"
 
 export const Login = () => {
   const { login } = useAuth()
   const [isLoggingIn, setIsLoggingIn] = useState(false)
-
-  const { handleSubmit, control } = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-  })
-
-  const apiLogin = (_data: z.infer<typeof loginSchema>) => {}
 
   const handleGoogleLogin = () => {
     setIsLoggingIn(true)
@@ -39,76 +26,22 @@ export const Login = () => {
         <CardHeader>
           <CardTitle className="text-3xl mb-2">Bem-vindo de volta</CardTitle>
           <CardDescription>
-            Escolha como prefere acessar sua conta
+            Acesse sua conta para continuar
           </CardDescription>
         </CardHeader>
-        <div className="flex flex-col items-center gap-2">
-          <h3 className="text-green-600 text-sm mb-2">
-            <FontAwesomeIcon className="me-1" icon={faStar} />
-            Opção recomendada
-          </h3>
-          <Button
-            className="w-full h-12 hover:cursor-pointer shadow-sm"
-            variant="outline"
-            onClick={handleGoogleLogin}
-            disabled={isLoggingIn}
-          >
-            {isLoggingIn ? (
-              <FontAwesomeIcon className="animate-spin" icon={faSpinner} />
-            ) : (
-              <FontAwesomeIcon className="text-blue-500" icon={faGoogle} />
-            )}
-            {isLoggingIn ? "Redirecionando..." : "Continuar com Google"}
-          </Button>
-        </div>
-        <div className="flex items-center gap-2 my-2">
-          <hr className="flex-1" />
-          <span className="text-sm text-muted-foreground">ou</span>
-          <hr className="flex-1" />
-        </div>
-        <form onSubmit={handleSubmit(apiLogin)}>
-          <FieldGroup>
-            <Controller
-              name="email"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    id="email"
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="seu@email.com"
-                  />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-            <Controller
-              name="password"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input
-                    id="password"
-                    type="password"
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="••••••••"
-                  />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-          </FieldGroup>
-          <Button
-            variant="default"
-            className="w-full mt-6 py-5 hover:cursor-pointer"
-          >
-            Entrar com email
-          </Button>
-        </form>
+        <Button
+          className="w-full h-12 hover:cursor-pointer shadow-sm"
+          variant="outline"
+          onClick={handleGoogleLogin}
+          disabled={isLoggingIn}
+        >
+          {isLoggingIn ? (
+            <FontAwesomeIcon className="animate-spin" icon={faSpinner} />
+          ) : (
+            <FontAwesomeIcon className="text-blue-500" icon={faGoogle} />
+          )}
+          {isLoggingIn ? "Redirecionando..." : "Continuar com Google"}
+        </Button>
       </Card>
     </div>
   )
