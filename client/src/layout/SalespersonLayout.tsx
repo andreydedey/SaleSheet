@@ -1,5 +1,4 @@
 import { Outlet } from "react-router"
-import { MobileTabBar } from "@/components/MobileTabBar"
 
 export function SalespersonLayout() {
   return (
@@ -8,13 +7,9 @@ export function SalespersonLayout() {
         <span className="font-semibold text-base">SaleSheet</span>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-24">
+      <main className="flex-1 overflow-y-auto p-4">
         <Outlet />
       </main>
-
-      <footer className="fixed bottom-0 inset-x-0 flex justify-center pb-[env(safe-area-inset-bottom)]">
-        <MobileTabBar />
-      </footer>
     </div>
   )
 }
