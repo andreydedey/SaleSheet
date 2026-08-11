@@ -60,7 +60,7 @@ export const SpreadSheet = () => {
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
-      lastPage.last ? undefined : lastPage.number + 1,
+      lastPage.number + 1 >= lastPage.totalPages ? undefined : lastPage.number + 1,
   })
 
   const spreadsheets = spreadsheetsData?.pages.flatMap((p) => p.content) ?? []

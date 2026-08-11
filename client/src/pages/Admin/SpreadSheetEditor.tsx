@@ -46,7 +46,7 @@ export const SpreadSheetEditor = () => {
 
   const { data: productsPage } = useQuery({
     queryKey: ["products", spreadsheetId],
-    queryFn: () => listProducts(spreadsheetId, 0, 100),
+    queryFn: () => listProducts(spreadsheetId, { page: 0, size: 100 }),
   })
 
   const { data: salespersonsPage } = useQuery({
