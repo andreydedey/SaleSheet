@@ -2,7 +2,7 @@ package com.example.salesheet.services;
 
 import com.example.salesheet.dto.SpreadSheetCreateDTO;
 import com.example.salesheet.dto.SpreadSheetDTO;
-import com.example.salesheet.dto.SpreadSheetListDTO;
+import com.example.salesheet.dto.SpreadSheetPageDTO;
 import com.example.salesheet.entities.SpreadSheet;
 import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.mappers.SpreadSheetMapper;
@@ -13,7 +13,6 @@ import com.example.salesheet.specifications.SpreadSheetSpecifications;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,9 +31,9 @@ public class SpreadsheetService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public Page<SpreadSheetListDTO> list(UUID salespersonId, SpreadSheetStatus status, String name, Pageable pageable) {
-        var spec = SpreadSheetSpecifications.buildSpec(salespersonId, status, name);
-        return spreadsheetRepository.findAllAsListDTO(spec, pageable);
+    public SpreadSheetPageDTO list(UUID salespersonId, SpreadSheetStatus status, String name, Pageable pageable) {
+        var listSpec = SpreadSheetSpecifications.buildSpec(salespersonId, status, name);
+        return spreadsheetRepository.findAllWithCounts(listSpec, salespersonId, pageable);
     }
 
     public SpreadSheetDTO create(SpreadSheetCreateDTO dto) {

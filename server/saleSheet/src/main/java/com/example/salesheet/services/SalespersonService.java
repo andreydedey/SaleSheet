@@ -1,8 +1,6 @@
 package com.example.salesheet.services;
 
 import com.example.salesheet.dto.SalespersonStatsDTO;
-import com.example.salesheet.entities.SpreadSheet;
-import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.specifications.SpreadSheetSpecifications;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,12 +21,12 @@ public class SalespersonService {
         var spec = SpreadSheetSpecifications.hasUser(userId)
                 .and(SpreadSheetSpecifications.isNotDraft());
 
-        var spreadsheets = spreadsheetRepository.findAllAsListDTO(spec, Pageable.unpaged());
+        var result = spreadsheetRepository.findAllWithCounts(spec, userId, Pageable.unpaged());
 
-        long totalPieces = spreadsheets.getContent().stream().mapToLong(s -> s.getTotalPieces()).sum();
-        long totalSoldPieces = spreadsheets.getContent().stream().mapToLong(s -> s.getSoldPieces()).sum();
-        long totalSold = 0; // Price sum would need a separate query
+        long totalPieces = result.content().stream().mapToLong(s -> s.getTotalPieces()).sum();
+        long totalSoldPieces = result.content().stream().mapToLong(s -> s.getSoldPieces()).sum();
+        long totalSold = result.content().stream().mapToLong(s -> s.getTotalSold()).sum();
 
-        return new SalespersonStatsDTO(totalSold, totalPieces, totalSoldPieces, spreadsheets.getContent().size());
+        return new SalespersonStatsDTO(totalSold, totalPieces, totalSoldPieces, (int) result.totalCount());
     }
 }

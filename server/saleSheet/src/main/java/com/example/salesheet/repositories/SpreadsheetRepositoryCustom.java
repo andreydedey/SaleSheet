@@ -1,12 +1,12 @@
 package com.example.salesheet.repositories;
 
-import com.example.salesheet.dto.SpreadSheetListDTO;
-import org.springframework.data.domain.Page;
+import com.example.salesheet.dto.SpreadSheetPageDTO;
+import com.example.salesheet.entities.SpreadSheet;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.example.salesheet.entities.SpreadSheet;
+import java.util.UUID;
 
 public interface SpreadsheetRepositoryCustom {
-    Page<SpreadSheetListDTO> findAllAsListDTO(Specification<SpreadSheet> spec, Pageable pageable);
+    SpreadSheetPageDTO findAllWithCounts(Specification<SpreadSheet> listSpec, UUID userId, Pageable pageable);
 }
