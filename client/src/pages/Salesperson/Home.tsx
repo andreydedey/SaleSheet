@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +14,7 @@ import { getMyStats, getMySpreadsheets } from "@/lib/api/salesperson"
 import { useAuth } from "@/context/AuthContext"
 import { Link } from "react-router"
 import { formatCents } from "@/components/ui/currency-input"
+import { cn } from "@/lib/utils"
 import type { SpreadSheetStatus } from "@/types/api"
 
 const statusLabel: Record<SpreadSheetStatus, string> = {
@@ -21,20 +23,28 @@ const statusLabel: Record<SpreadSheetStatus, string> = {
   INACTIVE: "Inativo",
 }
 
+type StatusFilter = "ALL" | "ACTIVE" | "INACTIVE"
+
 export const Home = () => {
   const { user } = useAuth()
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL")
 
   const { data: stats } = useQuery({
     queryKey: ["salesperson", "stats"],
     queryFn: getMyStats,
   })
 
-  const { data: spreadsheetsPage } = useQuery({
-    queryKey: ["salesperson", "spreadsheets"],
-    queryFn: () => getMySpreadsheets(),
+  const statusParam = statusFilter === "ALL" ? undefined : statusFilter
+
+  const { data: page } = useQuery({
+    queryKey: ["salesperson", "spreadsheets", statusFilter],
+    queryFn: () => getMySpreadsheets({ status: statusParam }),
   })
 
-  const spreadsheets = spreadsheetsPage?.content ?? []
+  const filteredSpreadsheets = page?.content ?? []
+  const totalCount = page?.totalCount ?? 0
+  const activeCount = page?.activeCount ?? 0
+  const inactiveCount = page?.inactiveCount ?? 0
 
   return (
     <div className="flex flex-col gap-4">
@@ -68,10 +78,42 @@ export const Home = () => {
           </p>
         </CardContent>
       </Card>
-      <h2 className="font-semibold  text-foreground">Planilhas</h2>
-      {spreadsheets.map((spreadsheet) => (
+      <h2 className="font-semibold text-foreground">Planilhas</h2>
+      <div className="flex gap-2">
+        {(
+          [
+            { label: "Todas", value: "ALL", count: totalCount },
+            { label: "Ativas", value: "ACTIVE", count: activeCount },
+            { label: "Inativas", value: "INACTIVE", count: inactiveCount },
+          ] as { label: string; value: StatusFilter; count: number }[]
+        ).map(({ label, value, count }) => (
+          <button
+            key={value}
+            onClick={() => setStatusFilter(value)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium border",
+              statusFilter === value
+                ? "bg-foreground text-background border-foreground"
+                : "bg-background text-foreground border-border",
+            )}
+          >
+            {label}
+            <span
+              className={cn(
+                "text-xs rounded-full px-1.5 py-0.5 font-semibold",
+                statusFilter === value
+                  ? "bg-white/20 text-background"
+                  : "bg-muted text-muted-foreground",
+              )}
+            >
+              {count}
+            </span>
+          </button>
+        ))}
+      </div>
+      {filteredSpreadsheets.map((spreadsheet) => (
         <Card key={spreadsheet.id} className="flex flex-col gap-1">
-          <CardHeader className="flex justify-between">
+          <CardHeader className="flex justify-between items-center">
             <span className="text-lg font-bold text-foreground">
               {spreadsheet.name}
             </span>

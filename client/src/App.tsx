@@ -39,6 +39,7 @@ export default function App() {
         <Route element={<ProtectedRoute role="SALESPERSON" />}>
           <Route path="/salesperson" element={<SalespersonLayout />}>
             <Route path="home" element={<Home />} />
+            <Route path="spreadsheets" element={<Home />} />
             <Route path="spreadsheets/:id" element={<SalespersonSpreadSheet />} />
           </Route>
         </Route>
