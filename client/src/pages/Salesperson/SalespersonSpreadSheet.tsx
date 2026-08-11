@@ -12,7 +12,7 @@ import { useNavigate, useParams } from "react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getMySpreadsheet } from "@/lib/api/salesperson"
 import { listProducts, markSold, addNote } from "@/lib/api/products"
-import type { SpreadSheetStatus } from "@/types/api"
+import type { SpreadSheetStatus, ProductPageDTO } from "@/types/api"
 import { formatCents } from "@/components/ui/currency-input"
 
 type ProductFilter = "ALL" | "SOLD" | "UNSOLD"
@@ -48,7 +48,21 @@ export const SalespersonSpreadSheet = () => {
   const markSoldMutation = useMutation({
     mutationFn: ({ itemId, sold }: { itemId: number; sold: boolean }) =>
       markSold(spreadsheetId, itemId, sold),
-    onSuccess: () => {
+    onMutate: async ({ itemId, sold }) => {
+      await queryClient.cancelQueries({ queryKey: ["products", spreadsheetId, productFilter] })
+      const previous = queryClient.getQueryData<ProductPageDTO>(["products", spreadsheetId, productFilter])
+      queryClient.setQueryData<ProductPageDTO>(["products", spreadsheetId, productFilter], (old) => {
+        if (!old) return old
+        return { ...old, content: old.content.map((p) => p.id === itemId ? { ...p, sold } : p) }
+      })
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["products", spreadsheetId, productFilter], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
     },
   })
