@@ -40,6 +40,24 @@ The back-end was built with **Spring Boot** and uses **Google OAuth2** for authe
 - Add notes per product
 - Filter products by All / Sold / Open
 
+## 📸 Screenshots
+
+### Admin
+
+| Dashboard | Planilhas |
+|---|---|
+| ![Dashboard](docs/screenshots/admin-dashboard.png) | ![Planilhas](docs/screenshots/admin-planilhas.png) |
+
+| Editor (Rascunho) | Planilha Emitida |
+|---|---|
+| ![Editor](docs/screenshots/admin-editor.png) | ![Emitida](docs/screenshots/admin-planilha-emitida.png) |
+
+### Salesperson (Mobile)
+
+| Lista de Produtos | Adicionar Observação |
+|---|---|
+| ![Planilha](docs/screenshots/mobile-planilha.png) | ![Observação](docs/screenshots/mobile-observacao.png) |
+
 ## ▶️ Running the project
 
 **Prerequisites:** Java 21, Bun and Docker
