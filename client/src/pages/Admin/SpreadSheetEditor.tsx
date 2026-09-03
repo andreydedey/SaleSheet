@@ -33,6 +33,13 @@ import { listProducts, deleteProduct } from "@/lib/api/products"
 import { getSalespersons } from "@/lib/api/dashboard"
 import { toast } from "sonner"
 import { formatCents } from "@/components/ui/currency-input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export const SpreadSheetEditor = () => {
   const [searchParams] = useSearchParams()
@@ -124,16 +131,19 @@ export const SpreadSheetEditor = () => {
           </div>
           <div className="flex flex-col gap-1 min-w-56">
             <label className="text-sm font-medium">Revendedor</label>
-            <select
-              className="border rounded-md px-3 py-2 text-sm bg-background"
-              value={spreadsheet?.salespersonId ?? ""}
-              onChange={(e) => salespersonMutation.mutate(e.target.value)}
+            <Select
+              value={spreadsheet?.salespersonId ? String(spreadsheet.salespersonId) : undefined}
+              onValueChange={(v) => salespersonMutation.mutate(v)}
             >
-              <option value="" disabled>Selecione o revendedor</option>
-              {salespersons.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o revendedor" />
+              </SelectTrigger>
+              <SelectContent>
+                {salespersons.map((s) => (
+                  <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>

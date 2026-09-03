@@ -21,6 +21,13 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "react-router"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"
 
 const createSpreadsheetSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -97,19 +104,22 @@ export const CreateSpreadSheetDialog = () => {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="salesperson">Revendedor</FieldLabel>
-                  <select
-                    id="salesperson"
-                    className="w-full border rounded-md px-3 py-2"
-                    {...field}
+                  <FieldLabel>Revendedor</FieldLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
                   >
-                    <option value="">Selecione o revendedor</option>
-                    {salespersonsPage?.content.map((sp) => (
-                      <option key={sp.id} value={sp.id}>
-                        {sp.name}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o revendedor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {salespersonsPage?.content.map((sp) => (
+                        <SelectItem key={sp.id} value={String(sp.id)}>
+                          {sp.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
