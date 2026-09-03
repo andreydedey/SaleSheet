@@ -26,6 +26,7 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Value("${app.url}")
     private String appUrl;
@@ -42,7 +43,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
-                        .failureUrl(appUrl + "/login?error=not_invited")
+                        .failureHandler(oAuth2LoginFailureHandler)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
