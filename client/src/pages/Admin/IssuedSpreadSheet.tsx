@@ -40,7 +40,6 @@ import { ObservationPopover } from "@/components/ObservationPopover"
 import { MobileProductCard } from "@/components/MobileProductCard"
 import { FilterPills } from "@/components/FilterPills"
 import { useState } from "react"
-import { cn } from "@/lib/utils"
 import { ChevronLeft, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {

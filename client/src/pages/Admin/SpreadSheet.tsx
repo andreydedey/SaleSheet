@@ -22,7 +22,6 @@ import { getSalespersons } from "@/lib/api/dashboard"
 import { useCallback } from "react"
 import { formatCents } from "@/components/ui/currency-input"
 import { useDebounce } from "use-debounce"
-import { cn } from "@/lib/utils"
 import { FilterPills } from "@/components/FilterPills"
 import {
   Empty,
