@@ -32,6 +32,7 @@ interface InviteDialogProps {
   onOpenChange: (open: boolean) => void
   salesperson?: SalespersonDTO
   onSuccess?: () => void
+  onDelete?: () => void
 }
 
 export const InviteDialog: React.FC<InviteDialogProps> = ({
@@ -39,6 +40,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
   onOpenChange,
   salesperson,
   onSuccess,
+  onDelete,
 }) => {
   const isEdit = !!salesperson
 
@@ -80,7 +82,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="min-w-md"
+        className="md:min-w-md"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -131,9 +133,22 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
               </Button>
             </DialogClose>
             <Button type="submit" disabled={mutation.isPending}>
-              {isEdit ? "Salvar" : "Convidar"}
+              {isEdit ? "Salvar Alterações" : "Convidar"}
             </Button>
           </DialogFooter>
+          {isEdit && onDelete && (
+            <Button
+              variant="link"
+              type="button"
+              onClick={() => {
+                onDelete()
+                onOpenChange(false)
+              }}
+              className="w-full text-destructive mt-2"
+            >
+              Bloquear revendedor
+            </Button>
+          )}
         </form>
       </DialogContent>
     </Dialog>

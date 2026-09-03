@@ -89,7 +89,7 @@ export const ProductDialogEditor: React.FC<ProductDialogEditorProps> = ({
 
   const dialogContent = (
     <DialogContent
-      className="min-w-md"
+      className="md:min-w-md"
       onInteractOutside={(e) => e.preventDefault()}
     >
       <DialogHeader>
@@ -153,7 +153,7 @@ export const ProductDialogEditor: React.FC<ProductDialogEditorProps> = ({
             </Button>
           </DialogClose>
           <Button type="submit">
-            {isEdit ? "Salvar" : "Adicionar Produto"}
+            {isEdit ? "Salvar Alterações" : "Adicionar Produto"}
           </Button>
         </DialogFooter>
       </form>
