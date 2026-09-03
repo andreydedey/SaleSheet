@@ -84,7 +84,7 @@ export const Dashboard = () => {
             <CardDescription>Total revendedores</CardDescription>
             <FontAwesomeIcon className="text-violet-600" icon={faUsers} />
           </CardHeader>
-          <CardContent className="text-3xl font-bold">
+          <CardContent className="text-xl md:text-3xl font-bold">
             {stats?.totalSalespersons ?? 0}
           </CardContent>
         </Card>
@@ -93,7 +93,7 @@ export const Dashboard = () => {
             <CardDescription>Total vendido</CardDescription>
             <FontAwesomeIcon className="text-green-600" icon={faDollarSign} />
           </CardHeader>
-          <CardContent className="text-3xl font-bold">
+          <CardContent className="text-xl md:text-3xl font-bold">
             {formatCents(stats?.totalSold ?? 0)}
           </CardContent>
         </Card>
@@ -102,7 +102,7 @@ export const Dashboard = () => {
             <CardDescription>Planilhas Ativas</CardDescription>
             <FontAwesomeIcon className="text-blue-700" icon={faTable} />
           </CardHeader>
-          <CardContent className="text-3xl font-bold">
+          <CardContent className="text-xl md:text-3xl font-bold">
             {stats?.activeSpreadsheets ?? 0}
           </CardContent>
         </Card>
@@ -175,13 +175,13 @@ export const Dashboard = () => {
             onClick={() => openEdit(person)}
           >
             <CardContent className="space-y-1">
-              <p className="font-semibold text-foreground">{person.name}</p>
-              <p className="text-sm text-muted-foreground">{person.email}</p>
+              <p className="text-sm font-semibold text-foreground">{person.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{person.email}</p>
               <div className="flex items-center justify-between pt-1">
-                <span className="text-sm font-semibold text-green-600">
+                <span className="text-xs font-semibold text-green-600">
                   {formatCents(person.sales)}
                 </span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Planilhas{" "}
                   <span className="font-semibold text-foreground">
                     {person.spreadsheetsCount}
