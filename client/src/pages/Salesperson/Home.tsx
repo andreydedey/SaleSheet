@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useSearchParams } from "react-router"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,8 +14,16 @@ import { getMyStats, getMySpreadsheets } from "@/lib/api/salesperson"
 import { useAuth } from "@/context/AuthContext"
 import { Link } from "react-router"
 import { formatCents } from "@/components/ui/currency-input"
-import { cn } from "@/lib/utils"
 import type { SpreadSheetStatus } from "@/types/api"
+import { FilterPills } from "@/components/FilterPills"
+import { SearchX } from "lucide-react"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 
 const statusLabel: Record<SpreadSheetStatus, string> = {
   DRAFT: "Rascunho",
@@ -27,7 +35,8 @@ type StatusFilter = "ALL" | "ACTIVE" | "INACTIVE"
 
 export const Home = () => {
   const { user } = useAuth()
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const statusFilter = (searchParams.get("status") ?? "ALL") as StatusFilter
 
   const { data: stats } = useQuery({
     queryKey: ["salesperson", "stats"],
@@ -79,39 +88,41 @@ export const Home = () => {
         </CardContent>
       </Card>
       <h2 className="font-semibold text-foreground">Planilhas</h2>
-      <div className="flex gap-2">
-        {(
-          [
-            { label: "Todas", value: "ALL", count: totalCount },
-            { label: "Ativas", value: "ACTIVE", count: activeCount },
-            { label: "Inativas", value: "INACTIVE", count: inactiveCount },
-          ] as { label: string; value: StatusFilter; count: number }[]
-        ).map(({ label, value, count }) => (
-          <button
-            key={value}
-            onClick={() => setStatusFilter(value)}
-            className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium border",
-              statusFilter === value
-                ? "bg-foreground text-background border-foreground"
-                : "bg-background text-foreground border-border",
-            )}
-          >
-            {label}
-            <span
-              className={cn(
-                "text-xs rounded-full px-1.5 py-0.5 font-semibold",
-                statusFilter === value
-                  ? "bg-white/20 text-background"
-                  : "bg-muted text-muted-foreground",
+      <FilterPills
+        options={[
+          { label: "Todas", value: "ALL" as StatusFilter, count: totalCount },
+          { label: "Ativas", value: "ACTIVE" as StatusFilter, count: activeCount },
+          { label: "Inativas", value: "INACTIVE" as StatusFilter, count: inactiveCount },
+        ]}
+        value={statusFilter}
+        onChange={(v) => setSearchParams(v === "ALL" ? {} : { status: v }, { replace: true })}
+      />
+      {filteredSpreadsheets.length === 0 ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia>
+              <SearchX className="size-10 text-muted-foreground" />
+            </EmptyMedia>
+            <EmptyTitle>
+              {statusFilter === "INACTIVE"
+                ? "Nenhuma planilha inativa"
+                : statusFilter === "ACTIVE"
+                  ? "Nenhuma planilha ativa"
+                  : "Nenhuma planilha encontrada"}
+            </EmptyTitle>
+            <EmptyDescription>
+              {statusFilter !== "ALL"
+                ? `Você não possui planilhas ${statusFilter === "INACTIVE" ? "inativas" : "ativas"} no momento. `
+                : "Você ainda não possui planilhas."}
+              {statusFilter !== "ALL" && (
+                <a href="#" onClick={(e) => { e.preventDefault(); setSearchParams({}, { replace: true }) }}>
+                  Ver todas as planilhas
+                </a>
               )}
-            >
-              {count}
-            </span>
-          </button>
-        ))}
-      </div>
-      {filteredSpreadsheets.map((spreadsheet) => (
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : filteredSpreadsheets.map((spreadsheet) => (
         <Card key={spreadsheet.id} className="flex flex-col gap-1">
           <CardHeader className="flex justify-between items-center">
             <span className="text-lg font-bold text-foreground">

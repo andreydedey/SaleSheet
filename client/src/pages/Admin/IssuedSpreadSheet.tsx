@@ -23,7 +23,7 @@ import { ActivateSpreadsheetDialog } from "@/components/ActivateSpreadsheetDialo
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { formatCents } from "@/components/ui/currency-input"
-import { Link, useParams } from "react-router"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,33 +33,68 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { getSpreadsheet } from "@/lib/api/spreadsheets"
-import { listProducts, markSold, deleteProduct } from "@/lib/api/products"
+import { listProducts, markSold, deleteProduct, addNote } from "@/lib/api/products"
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
 import { ObservationPopover } from "@/components/ObservationPopover"
+import { MobileProductCard } from "@/components/MobileProductCard"
+import { FilterPills } from "@/components/FilterPills"
 import { useState } from "react"
-import type { ProductDTO } from "@/types/api"
+import { cn } from "@/lib/utils"
+import { ChevronLeft } from "lucide-react"
+import type { ProductDTO, ProductPageDTO } from "@/types/api"
+
+type ProductFilter = "ALL" | "SOLD" | "UNSOLD"
 
 export const IssuedSpreadSheet = () => {
   const { id } = useParams<{ id: string }>()
   const spreadsheetId = Number(id)
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const productFilter = (searchParams.get("filter") ?? "ALL") as ProductFilter
 
   const { data: spreadsheet } = useQuery({
     queryKey: ["spreadsheet", spreadsheetId],
     queryFn: () => getSpreadsheet(spreadsheetId),
   })
 
+  const soldParam =
+    productFilter === "SOLD" ? true : productFilter === "UNSOLD" ? false : undefined
+
   const { data: productsPage } = useQuery({
-    queryKey: ["products", spreadsheetId],
-    queryFn: () => listProducts(spreadsheetId, { page: 0, size: 100 }),
+    queryKey: ["products", spreadsheetId, productFilter],
+    queryFn: () => listProducts(spreadsheetId, { page: 0, size: 100, sold: soldParam }),
   })
 
   const markSoldMutation = useMutation({
     mutationFn: ({ itemId, sold }: { itemId: number; sold: boolean }) =>
       markSold(spreadsheetId, itemId, sold),
+    onMutate: async ({ itemId, sold }) => {
+      await queryClient.cancelQueries({ queryKey: ["products", spreadsheetId, productFilter] })
+      const previous = queryClient.getQueryData<ProductPageDTO>(["products", spreadsheetId, productFilter])
+      queryClient.setQueryData<ProductPageDTO>(["products", spreadsheetId, productFilter], (old) => {
+        if (!old) return old
+        return { ...old, content: old.content.map((p) => p.id === itemId ? { ...p, sold } : p) }
+      })
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["products", spreadsheetId, productFilter], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+    },
+  })
+
+  const addNoteMutation = useMutation({
+    mutationFn: ({ itemId, observation }: { itemId: number; observation: string }) =>
+      addNote(spreadsheetId, itemId, observation),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
     },
+    onError: () => toast.error("Erro ao salvar observação."),
   })
 
   const deleteMutation = useMutation({
@@ -79,29 +114,58 @@ export const IssuedSpreadSheet = () => {
     setEditingProduct(product)
     setEditOpen(true)
   }
-  const totalPieces = products.length
-  const soldPieces = products.filter((p) => p.sold).length
-  const unsoldPieces = totalPieces - soldPieces
+
+  const totalPieces = productsPage?.totalCount ?? products.length
+  const soldPieces = productsPage?.soldCount ?? products.filter((p) => p.sold).length
+  const unsoldPieces = productsPage?.unsoldCount ?? totalPieces - soldPieces
   const totalSold = products
     .filter((p) => p.sold)
     .reduce((sum, p) => sum + p.price, 0)
 
   return (
-    <div className="flex flex-col gap-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/spreadsheets">Planilhas</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{spreadsheet?.name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <div className="flex justify-between items-start">
+    <div className="flex flex-col gap-4 md:gap-6">
+      {/* Desktop: breadcrumb */}
+      <div className="hidden md:block">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/spreadsheets">Planilhas</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{spreadsheet?.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      {/* Mobile: back header */}
+      <div className="md:hidden flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/spreadsheets")}
+            className="flex items-center justify-center size-10 rounded-full bg-muted"
+          >
+            <ChevronLeft className="size-5 text-foreground" />
+          </button>
+          <div>
+            <h1 className="text-lg font-bold text-foreground">
+              {spreadsheet?.salespersonName ?? spreadsheet?.name}
+            </h1>
+            <p className="text-sm text-muted-foreground">{spreadsheet?.name}</p>
+          </div>
+        </div>
+        {spreadsheet?.status === "ACTIVE" ? (
+          <Badge className="bg-green-50 text-green-700">Emitida</Badge>
+        ) : (
+          <Badge className="bg-gray-100 text-gray-600">Inativa</Badge>
+        )}
+      </div>
+
+      {/* Desktop: title + status */}
+      <div className="hidden md:flex justify-between items-start">
         <div className="space-y-2">
           <div className="flex gap-2 items-center">
             <h1 className="text-2xl font-bold">
@@ -113,7 +177,7 @@ export const IssuedSpreadSheet = () => {
               <Badge className="bg-gray-100 text-gray-600">Inativa</Badge>
             )}
           </div>
-          <h3 className="text-muted-foreground text-[14px]">
+          <h3 className="text-muted-foreground text-sm">
             Emitida em{" "}
             {spreadsheet?.issuedAt
               ? new Date(spreadsheet.issuedAt).toLocaleDateString("pt-BR")
@@ -134,6 +198,7 @@ export const IssuedSpreadSheet = () => {
           />
         )}
       </div>
+
       {spreadsheet?.status === "INACTIVE" && (
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
           <FontAwesomeIcon icon={faCircleExclamation} className="text-red-500 text-lg shrink-0" />
@@ -143,7 +208,29 @@ export const IssuedSpreadSheet = () => {
           </div>
         </div>
       )}
-      <div className="flex gap-4 *:flex-1">
+
+      {/* Mobile: stats row */}
+      <div className="md:hidden flex [&>div]:flex-1 [&>div]:pl-2 [&>div]:whitespace-nowrap [&>div:not(:first-child)]:border-l-2">
+        <div>
+          <p className="text-sm text-muted-foreground">Peças</p>
+          <p className="font-bold text-foreground text-lg">{totalPieces}</p>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Vendidos</p>
+          <p className="font-bold text-green-600 text-lg">{soldPieces}</p>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Em aberto</p>
+          <p className="font-bold text-red-600 text-lg">{unsoldPieces}</p>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Total</p>
+          <p className="font-bold text-lg text-violet-600">{formatCents(totalSold)}</p>
+        </div>
+      </div>
+
+      {/* Desktop: stat cards */}
+      <div className="hidden md:flex gap-4 *:flex-1">
         <Card>
           <CardContent className="flex items-center gap-4">
             <FontAwesomeIcon className="text-xl" icon={faBoxOpen} />
@@ -194,7 +281,39 @@ export const IssuedSpreadSheet = () => {
           </CardContent>
         </Card>
       </div>
-      <div>
+
+      {/* Mobile: filter pills */}
+      <div className="md:hidden">
+        <FilterPills
+          options={[
+            { label: "Todos", value: "ALL" as ProductFilter, count: totalPieces },
+            { label: "Vendidos", value: "SOLD" as ProductFilter, count: soldPieces },
+            { label: "Em aberto", value: "UNSOLD" as ProductFilter, count: unsoldPieces },
+          ]}
+          value={productFilter}
+          onChange={(v) => setSearchParams(v === "ALL" ? {} : { filter: v }, { replace: true })}
+        />
+      </div>
+
+      {/* Mobile: product cards */}
+      <div className="md:hidden space-y-3">
+        {products.map((item) => (
+          <MobileProductCard
+            key={item.id}
+            product={item}
+            onMarkSold={(sold) =>
+              markSoldMutation.mutate({ itemId: item.id, sold })
+            }
+            onSaveObservation={(observation) =>
+              addNoteMutation.mutate({ itemId: item.id, observation })
+            }
+            observationSaving={addNoteMutation.isPending}
+          />
+        ))}
+      </div>
+
+      {/* Desktop: products table */}
+      <div className="hidden md:block">
         <Card className="ring-0 border border-b-0 rounded-b-none">
           <CardHeader className="flex justify-between">
             <h4 className="text-base font-semibold">Produtos</h4>
@@ -217,7 +336,7 @@ export const IssuedSpreadSheet = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((item, _index) => (
+            {products.map((item) => (
               <TableRow key={item.id} className={item.sold ? "bg-green-50 hover:bg-green-50" : ""}>
                 <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
@@ -270,6 +389,7 @@ export const IssuedSpreadSheet = () => {
           </TableBody>
         </Table>
       </div>
+
       <ProductDialogEditor
         spreadsheetId={spreadsheetId}
         product={editingProduct}
