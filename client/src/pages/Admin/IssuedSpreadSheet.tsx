@@ -32,7 +32,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { getSpreadsheet } from "@/lib/api/spreadsheets"
+import { getSpreadsheet, updateSpreadsheetSalesperson } from "@/lib/api/spreadsheets"
+import { getSalespersons } from "@/lib/api/dashboard"
 import { listProducts, markSold, deleteProduct, addNote } from "@/lib/api/products"
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
 import { ObservationPopover } from "@/components/ObservationPopover"
@@ -40,7 +41,15 @@ import { MobileProductCard } from "@/components/MobileProductCard"
 import { FilterPills } from "@/components/FilterPills"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft, UserRound } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { ProductDTO, ProductPageDTO } from "@/types/api"
 
 type ProductFilter = "ALL" | "SOLD" | "UNSOLD"
@@ -106,9 +115,29 @@ export const IssuedSpreadSheet = () => {
     onError: () => toast.error("Erro ao remover produto."),
   })
 
+  const { data: salespersonsPage } = useQuery({
+    queryKey: ["dashboard", "salespersons"],
+    queryFn: () => getSalespersons(0, 100),
+  })
+
+  const salespersons = salespersonsPage?.content ?? []
+
+  const salespersonMutation = useMutation({
+    mutationFn: (salespersonId: string) =>
+      updateSpreadsheetSalesperson(spreadsheetId, salespersonId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spreadsheet", spreadsheetId] })
+      toast.success("Revendedor atualizado.")
+      setChangingSalesperson(false)
+    },
+    onError: () => toast.error("Erro ao alterar revendedor."),
+  })
+
   const products = productsPage?.content ?? []
   const [editingProduct, setEditingProduct] = useState<ProductDTO | undefined>()
   const [editOpen, setEditOpen] = useState(false)
+  const [changingSalesperson, setChangingSalesperson] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<ProductDTO | undefined>()
 
   const openEdit = (product: ProductDTO) => {
     setEditingProduct(product)
@@ -282,6 +311,49 @@ export const IssuedSpreadSheet = () => {
         </Card>
       </div>
 
+      {/* Mobile: salesperson section */}
+      <div className="md:hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-full bg-muted flex items-center justify-center">
+              <UserRound className="size-5 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Revendedor</p>
+              <p className="text-sm font-semibold text-foreground">
+                {spreadsheet?.salespersonName ?? "-"}
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setChangingSalesperson(!changingSalesperson)}
+          >
+            Alterar
+          </Button>
+        </div>
+        {changingSalesperson && (
+          <div className="mt-3">
+            <Select
+              value={String(spreadsheet?.salespersonId ?? "")}
+              onValueChange={(v) => salespersonMutation.mutate(v)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecionar revendedor" />
+              </SelectTrigger>
+              <SelectContent>
+                {salespersons.map((s) => (
+                  <SelectItem key={s.id} value={String(s.id)}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
       {/* Mobile: filter pills */}
       <div className="md:hidden">
         <FilterPills
@@ -308,9 +380,21 @@ export const IssuedSpreadSheet = () => {
               addNoteMutation.mutate({ itemId: item.id, observation })
             }
             observationSaving={addNoteMutation.isPending}
+            onEdit={() => openEdit(item)}
+            onDelete={() => setDeleteTarget(item)}
           />
         ))}
       </div>
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(undefined) }}
+        description="O produto será removido permanentemente da planilha."
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id)
+          setDeleteTarget(undefined)
+        }}
+      />
 
       {/* Desktop: products table */}
       <div className="hidden md:block">

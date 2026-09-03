@@ -7,6 +7,7 @@ import {
   faCheck,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons"
+import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { cn } from "@/lib/utils"
 import { formatCents } from "@/components/ui/currency-input"
@@ -18,6 +19,8 @@ interface MobileProductCardProps {
   soldDisabled?: boolean
   onSaveObservation?: (observation: string) => void
   observationSaving?: boolean
+  onEdit?: () => void
+  onDelete?: () => void
 }
 
 export function MobileProductCard({
@@ -26,6 +29,8 @@ export function MobileProductCard({
   soldDisabled,
   onSaveObservation,
   observationSaving,
+  onEdit,
+  onDelete,
 }: MobileProductCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState("")
@@ -72,6 +77,22 @@ export function MobileProductCard({
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                className="size-9 rounded-lg flex items-center justify-center bg-blue-50 text-blue-500"
+              >
+                <FontAwesomeIcon icon={faEdit} className="text-sm" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={onDelete}
+                className="size-9 rounded-lg flex items-center justify-center bg-red-50 text-red-500"
+              >
+                <FontAwesomeIcon icon={faTrashCan} className="text-sm" />
+              </button>
+            )}
             {canEdit && (
               <button
                 onClick={openObservation}

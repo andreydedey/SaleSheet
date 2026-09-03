@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/alert-dialog"
 
 interface DeleteConfirmDialogProps {
-  trigger: React.ReactNode
+  trigger?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   title?: string
   description?: string
   onConfirm: () => void
@@ -19,13 +21,15 @@ interface DeleteConfirmDialogProps {
 
 export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   trigger,
+  open,
+  onOpenChange,
   title = "Tem certeza?",
   description = "Essa ação não pode ser desfeita.",
   onConfirm,
 }) => {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
