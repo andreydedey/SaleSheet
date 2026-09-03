@@ -164,9 +164,16 @@ export const Dashboard = () => {
 
       {/* Mobile: card list */}
       <div className="md:hidden space-y-3">
-        <h2 className="font-semibold text-base">Revendedores</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-base">Revendedores</h2>
+          <InviteButton onClick={openCreate} />
+        </div>
         {salespersonsPage?.content.map((person) => (
-          <Card key={person.id}>
+          <Card
+            key={person.id}
+            className="cursor-pointer active:bg-muted/50"
+            onClick={() => openEdit(person)}
+          >
             <CardContent className="space-y-1">
               <p className="font-semibold text-foreground">{person.name}</p>
               <p className="text-sm text-muted-foreground">{person.email}</p>
@@ -191,6 +198,7 @@ export const Dashboard = () => {
         onOpenChange={setDialogOpen}
         salesperson={editingSalesperson}
         onSuccess={invalidate}
+        onDelete={editingSalesperson ? () => deleteMutation.mutate(editingSalesperson.id) : undefined}
       />
       <CannotDeleteSalespersonDialog
         open={conflictWarning}

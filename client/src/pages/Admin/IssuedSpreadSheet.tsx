@@ -173,12 +173,14 @@ export const IssuedSpreadSheet = () => {
       {/* Mobile: back header */}
       <div className="md:hidden flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button
+          <Button
+            variant="secondary"
+            size="icon"
             onClick={() => navigate("/spreadsheets")}
-            className="flex items-center justify-center size-10 rounded-full bg-muted"
+            className="size-10 rounded-full"
           >
-            <ChevronLeft className="size-5 text-foreground" />
-          </button>
+            <ChevronLeft className="size-5" />
+          </Button>
           <div>
             <h1 className="text-lg font-bold text-foreground">
               {spreadsheet?.salespersonName ?? spreadsheet?.name}
@@ -352,6 +354,17 @@ export const IssuedSpreadSheet = () => {
             </Select>
           </div>
         )}
+      </div>
+
+      {/* Mobile: products heading + add button */}
+      <div className="md:hidden flex items-center justify-between">
+        <h2 className="font-semibold text-base">Produtos</h2>
+        <ProductDialogEditor
+          spreadsheetId={spreadsheetId}
+          onSaved={() =>
+            queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+          }
+        />
       </div>
 
       {/* Mobile: filter pills */}
