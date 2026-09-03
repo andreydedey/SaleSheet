@@ -76,17 +76,19 @@ export const Dashboard = () => {
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <div className="flex gap-4 mb-4">
-        <Card className="min-w-xs">
+
+      {/* Stats cards */}
+      <div className="grid grid-cols-2 gap-3 md:flex md:gap-4 mb-4">
+        <Card className="md:min-w-xs">
           <CardHeader className="flex items-center justify-between">
             <CardDescription>Total revendedores</CardDescription>
-            <FontAwesomeIcon className="text-violet-600 " icon={faUsers} />
+            <FontAwesomeIcon className="text-violet-600" icon={faUsers} />
           </CardHeader>
           <CardContent className="text-3xl font-bold">
             {stats?.totalSalespersons ?? 0}
           </CardContent>
         </Card>
-        <Card className="min-w-xs">
+        <Card className="md:min-w-xs">
           <CardHeader className="flex items-center justify-between">
             <CardDescription>Total vendido</CardDescription>
             <FontAwesomeIcon className="text-green-600" icon={faDollarSign} />
@@ -95,7 +97,7 @@ export const Dashboard = () => {
             {formatCents(stats?.totalSold ?? 0)}
           </CardContent>
         </Card>
-        <Card className="min-w-xs">
+        <Card className="col-span-2 md:col-span-1 md:min-w-xs">
           <CardHeader className="flex items-center justify-between">
             <CardDescription>Planilhas Ativas</CardDescription>
             <FontAwesomeIcon className="text-blue-700" icon={faTable} />
@@ -105,7 +107,9 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-      <div>
+
+      {/* Desktop: table */}
+      <div className="hidden md:block">
         <Card className="ring-0 border border-b-0 rounded-b-none">
           <CardHeader className="flex justify-between items-center">
             <p className="font-bold">Revendedores</p>
@@ -157,6 +161,31 @@ export const Dashboard = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Mobile: card list */}
+      <div className="md:hidden space-y-3">
+        <h2 className="font-semibold text-base">Revendedores</h2>
+        {salespersonsPage?.content.map((person) => (
+          <Card key={person.id}>
+            <CardContent className="space-y-1">
+              <p className="font-semibold text-foreground">{person.name}</p>
+              <p className="text-sm text-muted-foreground">{person.email}</p>
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-sm font-semibold text-green-600">
+                  {formatCents(person.sales)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  Planilhas{" "}
+                  <span className="font-semibold text-foreground">
+                    {person.spreadsheetsCount}
+                  </span>
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <InviteDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
