@@ -1,17 +1,18 @@
 import { AppSidebar } from "@/components/AppSidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Outlet, NavLink, useLocation } from "react-router"
-import { LayoutDashboard, Table2 } from "lucide-react"
+import { LayoutDashboard, Table2, Tags } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const adminTabs = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/spreadsheets", label: "Planilhas", icon: Table2 },
+  { to: "/definitions", label: "Definições", icon: Tags },
 ]
 
 export const SidebarLayout = () => {
   const { pathname } = useLocation()
-  const showTabBar = pathname === "/dashboard" || pathname === "/spreadsheets"
+  const showTabBar = adminTabs.some((tab) => tab.to === pathname)
 
   return (
     <SidebarProvider>

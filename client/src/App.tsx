@@ -8,6 +8,7 @@ import { SidebarLayout } from "./layout/AppSidebarLayout"
 import { SpreadSheet } from "./pages/Admin/SpreadSheet"
 import { SpreadSheetEditor } from "./pages/Admin/SpreadSheetEditor"
 import { IssuedSpreadSheet } from "./pages/Admin/IssuedSpreadSheet"
+import { Definitions } from "./pages/Admin/Definitions"
 import { SalespersonLayout } from "./layout/SalespersonLayout"
 import { Home } from "./pages/Salesperson/Home"
 import { SalespersonSpreadSheet } from "./pages/Salesperson/SalespersonSpreadSheet"
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="/spreadsheets" element={<SpreadSheet />} />
             <Route path="/spreadsheets/editor" element={<SpreadSheetEditor />} />
             <Route path="/spreadsheets/issued/:id" element={<IssuedSpreadSheet />} />
+            <Route path="/definitions" element={<Definitions />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute role="SALESPERSON" />}>

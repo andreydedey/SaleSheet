@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faHexagonNodes } from "@fortawesome/free-solid-svg-icons/faHexagonNodes"
 import { faTable } from "@fortawesome/free-solid-svg-icons/faTable"
 import { faChartArea } from "@fortawesome/free-solid-svg-icons/faChartArea"
+import { faTags } from "@fortawesome/free-solid-svg-icons/faTags"
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +21,7 @@ export const AppSidebar = () => {
   const routes = [
     { title: "Dashboard", url: "/dashboard", icon: faTable },
     { title: "Planilhas", url: "/spreadsheets", icon: faChartArea },
+    { title: "Definições", url: "/definitions", icon: faTags },
   ]
 
   return (
