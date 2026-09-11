@@ -15,7 +15,7 @@ export function listProducts(
 
 export function addProduct(
   spreadsheetId: number,
-  data: { reference: string; definition: string; price: number },
+  data: { reference: string; definition: { id: number }; price: number },
 ) {
   return api
     .post<ProductDTO>(`/api/spreadsheets/${spreadsheetId}/items`, data)
@@ -25,7 +25,7 @@ export function addProduct(
 export function updateProduct(
   spreadsheetId: number,
   itemId: number,
-  data: Partial<ProductDTO>,
+  data: { reference: string; definition: { id: number }; price: number },
 ) {
   return api
     .patch<ProductDTO>(

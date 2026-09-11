@@ -61,7 +61,7 @@ export const IssuedSpreadSheet = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const productFilter = (searchParams.get("filter") ?? "ALL") as ProductFilter
 
-  const { data: spreadsheet } = useQuery({
+  const { data: spreadsheet, refetch: refetchSpreadsheet } = useQuery({
     queryKey: ["spreadsheet", spreadsheetId],
     queryFn: () => getSpreadsheet(spreadsheetId),
   })
@@ -69,7 +69,7 @@ export const IssuedSpreadSheet = () => {
   const soldParam =
     productFilter === "SOLD" ? true : productFilter === "UNSOLD" ? false : undefined
 
-  const { data: productsPage } = useQuery({
+  const { data: productsPage, refetch: refetchProducts } = useQuery({
     queryKey: ["products", spreadsheetId, productFilter],
     queryFn: () => listProducts(spreadsheetId, { page: 0, size: 100, sold: soldParam }),
   })
@@ -91,17 +91,13 @@ export const IssuedSpreadSheet = () => {
         queryClient.setQueryData(["products", spreadsheetId, productFilter], context.previous)
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
-    },
+    onSettled: () => refetchProducts(),
   })
 
   const addNoteMutation = useMutation({
     mutationFn: ({ itemId, observation }: { itemId: number; observation: string }) =>
       addNote(spreadsheetId, itemId, observation),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
-    },
+    onSuccess: () => refetchProducts(),
     onError: () => toast.error("Erro ao salvar observação."),
   })
 
@@ -109,7 +105,7 @@ export const IssuedSpreadSheet = () => {
     mutationFn: (itemId: number) => deleteProduct(spreadsheetId, itemId),
     onSuccess: () => {
       toast.success("Produto removido.")
-      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+      refetchProducts()
     },
     onError: () => toast.error("Erro ao remover produto."),
   })
@@ -125,7 +121,7 @@ export const IssuedSpreadSheet = () => {
     mutationFn: (salespersonId: string) =>
       updateSpreadsheetSalesperson(spreadsheetId, salespersonId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spreadsheet", spreadsheetId] })
+      refetchSpreadsheet()
       toast.success("Revendedor atualizado.")
       setChangingSalesperson(false)
     },
@@ -355,15 +351,9 @@ export const IssuedSpreadSheet = () => {
         )}
       </div>
 
-      {/* Mobile: products heading + add button */}
+      {/* Mobile: products heading */}
       <div className="md:hidden flex items-center justify-between">
         <h2 className="font-semibold text-base">Produtos</h2>
-        <ProductDialogEditor
-          spreadsheetId={spreadsheetId}
-          onSaved={() =>
-            queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
-          }
-        />
       </div>
 
       {/* Mobile: filter pills */}
@@ -436,7 +426,7 @@ export const IssuedSpreadSheet = () => {
               <TableRow key={item.id} className={item.sold ? "bg-green-50 hover:bg-green-50" : ""}>
                 <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.reference}</TableCell>
-                <TableCell>{item.definition}</TableCell>
+                <TableCell>{item.definition?.name}</TableCell>
                 <TableCell className="font-semibold">{formatCents(item.price)}</TableCell>
                 <TableCell>
                   <Checkbox
@@ -491,9 +481,7 @@ export const IssuedSpreadSheet = () => {
         product={editingProduct}
         open={editOpen}
         onOpenChange={setEditOpen}
-        onSaved={() =>
-          queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
-        }
+        onSaved={refetchProducts}
       />
     </div>
   )

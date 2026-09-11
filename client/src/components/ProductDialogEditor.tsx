@@ -13,10 +13,17 @@ import { faPlusSquare } from "@fortawesome/free-regular-svg-icons"
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "./ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"
 import { CurrencyInputField } from "./ui/currency-input"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { addProduct, updateProduct } from "@/lib/api/products"
-import { useEffect, useState } from "react"
+import { listDefinitions } from "@/lib/api/definitions"
 import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -32,7 +39,7 @@ interface ProductDialogEditorProps {
 
 const productSchema = z.object({
   reference: z.string().min(1, "Referência é obrigatória"),
-  definition: z.string().min(1, "Definição é obrigatória"),
+  definitionId: z.number({ error: "Definição é obrigatória" }).int().positive("Definição é obrigatória"),
   price: z.number().int().positive("Valor deve ser maior que 0"),
 })
 
@@ -41,44 +48,41 @@ type ProductFormData = z.infer<typeof productSchema>
 export const ProductDialogEditor: React.FC<ProductDialogEditorProps> = ({
   spreadsheetId,
   product,
-  open: controlledOpen,
+  open,
   onOpenChange,
   onSaved,
 }) => {
   const isEdit = !!product
-  const isControlled = controlledOpen !== undefined
-  const [internalOpen, setInternalOpen] = useState(false)
-  const open = isControlled ? controlledOpen : internalOpen
+
+  const { data: definitions = [] } = useQuery({
+    queryKey: ["definitions"],
+    queryFn: listDefinitions,
+  })
 
   const { control, handleSubmit, reset } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
-    defaultValues: { reference: "", definition: "", price: 0 },
+    defaultValues: {
+      reference: product?.reference ?? "",
+      definitionId: product?.definition?.id ?? 0,
+      price: (product?.price as number) ?? 0,
+    },
   })
 
-  useEffect(() => {
-    if (open) {
-      reset(
-        product
-          ? { reference: product.reference, definition: product.definition, price: product.price as number }
-          : { reference: "", definition: "", price: 0 },
-      )
-    }
-  }, [open, product, reset])
-
-  const setOpen = (val: boolean) => {
-    if (isControlled) onOpenChange?.(val)
-    else setInternalOpen(val)
-  }
-
   const mutation = useMutation({
-    mutationFn: (data: ProductFormData) =>
-      isEdit
-        ? updateProduct(spreadsheetId, product!.id!, data)
-        : addProduct(spreadsheetId, data),
+    mutationFn: (data: ProductFormData) => {
+      const payload = {
+        reference: data.reference,
+        definition: { id: data.definitionId },
+        price: data.price,
+      }
+      return isEdit
+        ? updateProduct(spreadsheetId, product!.id!, payload)
+        : addProduct(spreadsheetId, payload)
+    },
     onSuccess: () => {
       toast.success(isEdit ? "Produto atualizado." : "Produto adicionado.")
       reset()
-      setOpen(false)
+      onOpenChange?.(false)
       onSaved?.()
     },
     onError: () =>
@@ -114,17 +118,27 @@ export const ProductDialogEditor: React.FC<ProductDialogEditorProps> = ({
             )}
           />
           <Controller
-            name="definition"
+            name="definitionId"
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="definition">Definição</FieldLabel>
-                <Input
-                  id="definition"
-                  placeholder="Descrição do produto"
-                  aria-invalid={fieldState.invalid}
-                  {...field}
-                />
+                <FieldLabel>Definição</FieldLabel>
+                <Select
+                  value={field.value ? String(field.value) : undefined}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  disabled={definitions.length === 0}
+                >
+                  <SelectTrigger className="w-full" aria-invalid={fieldState.invalid}>
+                    <SelectValue placeholder={definitions.length === 0 ? "Nenhuma definição cadastrada" : "Selecione uma definição"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {definitions.map((def) => (
+                      <SelectItem key={def.id} value={String(def.id)}>
+                        {def.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}
@@ -160,18 +174,16 @@ export const ProductDialogEditor: React.FC<ProductDialogEditorProps> = ({
     </DialogContent>
   )
 
-  if (isControlled) {
-    return <Dialog open={open} onOpenChange={setOpen}>{dialogContent}</Dialog>
-  }
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm">
-          <FontAwesomeIcon icon={faPlusSquare} />
-          Adicionar Produto
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {!isEdit && (
+        <DialogTrigger asChild>
+          <Button size="sm">
+            <FontAwesomeIcon icon={faPlusSquare} />
+            Adicionar Produto
+          </Button>
+        </DialogTrigger>
+      )}
       {dialogContent}
     </Dialog>
   )

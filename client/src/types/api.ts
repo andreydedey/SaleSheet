@@ -53,11 +53,22 @@ export type SpreadSheetDTO = {
   salespersonName: string | null
 }
 
+export type ProductDefinitionDTO = {
+  id: number
+  name: string
+}
+
+export type ProductDefinitionListDTO = {
+  id: number
+  name: string
+  productCount: number
+}
+
 export type ProductDTO = {
   id: number
   reference: string
   price: number
-  definition: string
+  definition: ProductDefinitionDTO
   sold: boolean
   observation: string | null
   observationUpdatedAt: string | null

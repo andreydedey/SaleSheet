@@ -66,7 +66,7 @@ export function MobileProductCard({
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">{product.reference}</p>
             <p className="text-sm text-foreground font-medium">
-              {product.definition}
+              {product.definition?.name}
             </p>
             <p
               className={cn(

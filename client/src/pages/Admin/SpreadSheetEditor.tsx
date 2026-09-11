@@ -19,9 +19,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import { Package } from "lucide-react"
 import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, useSearchParams } from "react-router"
 import { useState } from "react"
 import type { ProductDTO } from "@/types/api"
@@ -43,15 +51,14 @@ import {
 
 export const SpreadSheetEditor = () => {
   const [searchParams] = useSearchParams()
-  const queryClient = useQueryClient()
   const spreadsheetId = Number(searchParams.get("id"))
 
-  const { data: spreadsheet } = useQuery({
+  const { data: spreadsheet, refetch: refetchSpreadsheet } = useQuery({
     queryKey: ["spreadsheet", spreadsheetId],
     queryFn: () => getSpreadsheet(spreadsheetId),
   })
 
-  const { data: productsPage } = useQuery({
+  const { data: productsPage, refetch: refetchProducts } = useQuery({
     queryKey: ["products", spreadsheetId],
     queryFn: () => listProducts(spreadsheetId, { page: 0, size: 100 }),
   })
@@ -64,9 +71,7 @@ export const SpreadSheetEditor = () => {
   const salespersonMutation = useMutation({
     mutationFn: (salespersonId: string) =>
       updateSpreadsheetSalesperson(spreadsheetId, salespersonId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spreadsheet", spreadsheetId] })
-    },
+    onSuccess: () => refetchSpreadsheet(),
     onError: () => toast.error("Erro ao atualizar revendedor."),
   })
 
@@ -74,7 +79,7 @@ export const SpreadSheetEditor = () => {
     mutationFn: (itemId: number) => deleteProduct(spreadsheetId, itemId),
     onSuccess: () => {
       toast.success("Produto removido.")
-      queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
+      refetchProducts()
     },
     onError: () => toast.error("Erro ao remover produto."),
   })
@@ -155,11 +160,7 @@ export const SpreadSheetEditor = () => {
               <Badge variant="secondary">{products.length} produtos</Badge>
               <ProductDialogEditor
                 spreadsheetId={spreadsheetId}
-                onSaved={() =>
-                  queryClient.invalidateQueries({
-                    queryKey: ["products", spreadsheetId],
-                  })
-                }
+                onSaved={refetchProducts}
               />
             </div>
           </CardHeader>
@@ -175,31 +176,49 @@ export const SpreadSheetEditor = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.id}</TableCell>
-                <TableCell>{item.reference}</TableCell>
-                <TableCell>{item.definition}</TableCell>
-                <TableCell className="font-semibold">{formatCents(item.price)}</TableCell>
-                <TableCell className="space-x-2 text-base w-px whitespace-nowrap">
-                  <FontAwesomeIcon
-                    className="text-blue-500 hover:cursor-pointer"
-                    icon={faEdit}
-                    onClick={() => openEdit(item)}
-                  />
-                  <DeleteConfirmDialog
-                    trigger={
-                      <FontAwesomeIcon
-                        className="text-red-500 hover:cursor-pointer"
-                        icon={faTrashCan}
-                      />
-                    }
-                    description="O produto será removido permanentemente da planilha."
-                    onConfirm={() => deleteMutation.mutate(item.id)}
-                  />
+            {products.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia>
+                        <Package className="size-10 text-muted-foreground" />
+                      </EmptyMedia>
+                      <EmptyTitle>Nenhum produto cadastrado</EmptyTitle>
+                      <EmptyDescription>
+                        Adicione produtos para montar a planilha.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              products.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.id}</TableCell>
+                  <TableCell>{item.reference}</TableCell>
+                  <TableCell>{item.definition?.name}</TableCell>
+                  <TableCell className="font-semibold">{formatCents(item.price)}</TableCell>
+                  <TableCell className="space-x-2 text-base w-px whitespace-nowrap">
+                    <FontAwesomeIcon
+                      className="text-blue-500 hover:cursor-pointer"
+                      icon={faEdit}
+                      onClick={() => openEdit(item)}
+                    />
+                    <DeleteConfirmDialog
+                      trigger={
+                        <FontAwesomeIcon
+                          className="text-red-500 hover:cursor-pointer"
+                          icon={faTrashCan}
+                        />
+                      }
+                      description="O produto será removido permanentemente da planilha."
+                      onConfirm={() => deleteMutation.mutate(item.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -208,9 +227,7 @@ export const SpreadSheetEditor = () => {
         product={editingProduct}
         open={editOpen}
         onOpenChange={setEditOpen}
-        onSaved={() =>
-          queryClient.invalidateQueries({ queryKey: ["products", spreadsheetId] })
-        }
+        onSaved={refetchProducts}
       />
     </div>
   )
