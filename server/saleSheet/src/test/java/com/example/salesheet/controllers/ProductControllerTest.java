@@ -1,9 +1,11 @@
 package com.example.salesheet.controllers;
 
 import com.example.salesheet.dto.ProductDTO;
+import com.example.salesheet.dto.ProductDefinitionDTO;
 import com.example.salesheet.dto.ProductPageDTO;
 import com.example.salesheet.services.CustomOAuth2UserService;
 import com.example.salesheet.security.OAuth2LoginSuccessHandler;
+import com.example.salesheet.security.OAuth2LoginFailureHandler;
 import com.example.salesheet.services.ProductService;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -34,25 +36,26 @@ class ProductControllerTest {
     @MockitoBean ProductService productService;
     @MockitoBean CustomOAuth2UserService customOAuth2UserService;
     @MockitoBean OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    @MockitoBean OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void getProducts_returnsPageOfProducts() throws Exception {
-        var product = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, null, null);
+        var product = new ProductDTO(1L, "REF-001", 100L, new ProductDefinitionDTO(1L, "Blusa"), false, null, null);
         var page = new ProductPageDTO(List.of(product), 1, 1, 0, 20, 1, 0, 1);
         when(productService.getProducts(eq(1L), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/spreadsheets/1/items"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].reference").value("REF-001"))
-                .andExpect(jsonPath("$.content[0].definition").value("Blusa"));
+                .andExpect(jsonPath("$.content[0].definition.name").value("Blusa"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void addProduct_returnsCreated() throws Exception {
-        var dto = new ProductDTO(null, "REF-002", 150L, "Calça", false, null, null);
-        var saved = new ProductDTO(2L, "REF-002", 150L, "Calça", false, null, null);
+        var dto = new ProductDTO(null, "REF-002", 150L, new ProductDefinitionDTO(2L, "Calça"), false, null, null);
+        var saved = new ProductDTO(2L, "REF-002", 150L, new ProductDefinitionDTO(2L, "Calça"), false, null, null);
         when(productService.addProduct(eq(1L), any())).thenReturn(saved);
 
         mockMvc.perform(post("/spreadsheets/1/items")
@@ -67,8 +70,8 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateProduct_returnsOk() throws Exception {
-        var dto = new ProductDTO(null, "REF-UPD", 200L, "Calça Atualizada", false, "nota", null);
-        var updated = new ProductDTO(3L, "REF-UPD", 200L, "Calça Atualizada", false, "nota", null);
+        var dto = new ProductDTO(null, "REF-UPD", 200L, new ProductDefinitionDTO(2L, "Calça Atualizada"), false, "nota", null);
+        var updated = new ProductDTO(3L, "REF-UPD", 200L, new ProductDefinitionDTO(2L, "Calça Atualizada"), false, "nota", null);
         when(productService.updateProduct(eq(1L), eq(3L), any())).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1/items/3")
@@ -89,7 +92,7 @@ class ProductControllerTest {
         mockMvc.perform(patch("/spreadsheets/1/items/99")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"reference\":\"X\",\"price\":1,\"definition\":\"Y\"}"))
+                        .content("{\"reference\":\"X\",\"price\":1,\"definition\":{\"id\":1}}"))
                 .andExpect(status().isNotFound());
     }
 
@@ -117,7 +120,7 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void markSold_returnsUpdatedProduct() throws Exception {
-        var updated = new ProductDTO(1L, "REF-001", 100L, "Blusa", true, null, null);
+        var updated = new ProductDTO(1L, "REF-001", 100L, new ProductDefinitionDTO(1L, "Blusa"), true, null, null);
         when(productService.markSold(eq(1L), eq(1L), eq(true))).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1/items/1/sold")
@@ -131,7 +134,7 @@ class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void addNote_returnsUpdatedProduct() throws Exception {
-        var updated = new ProductDTO(1L, "REF-001", 100L, "Blusa", false, "aguardando pagamento", null);
+        var updated = new ProductDTO(1L, "REF-001", 100L, new ProductDefinitionDTO(1L, "Blusa"), false, "aguardando pagamento", null);
         when(productService.addNote(eq(1L), eq(1L), eq("aguardando pagamento"))).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1/items/1/note")

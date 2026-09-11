@@ -18,7 +18,9 @@ public class Product {
 
     private String reference;
 
-    private String definition;
+    @ManyToOne
+    @JoinColumn(name = "definition_id")
+    private ProductDefinition definition;
 
     private Long price;
 

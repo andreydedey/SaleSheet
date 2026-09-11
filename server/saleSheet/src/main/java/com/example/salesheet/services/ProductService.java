@@ -4,6 +4,8 @@ import com.example.salesheet.dto.ProductDTO;
 import com.example.salesheet.dto.ProductPageDTO;
 import com.example.salesheet.enums.SpreadSheetStatus;
 import com.example.salesheet.mappers.ProductMapper;
+import com.example.salesheet.entities.ProductDefinition;
+import com.example.salesheet.repositories.ProductDefinitionRepository;
 import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import com.example.salesheet.specifications.ProductSpecifications;
@@ -27,6 +29,7 @@ import java.util.Map;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductDefinitionRepository productDefinitionRepository;
     private final SpreadsheetRepository spreadsheetRepository;
 
     @Transactional(readOnly = true)
@@ -64,6 +67,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));
 
         var product = ProductMapper.toEntity(dto, spreadSheet);
+        product.setDefinition(resolveDefinition(dto));
         product = productRepository.save(product);
         log.info("Product added: id={}, reference={}, spreadsheetId={}", product.getId(), product.getReference(), spreadsheetId);
         return ProductMapper.toDTO(product);
@@ -75,7 +79,7 @@ public class ProductService {
 
         product.setReference(dto.getReference());
         product.setPrice(dto.getPrice());
-        product.setDefinition(dto.getDefinition());
+        product.setDefinition(resolveDefinition(dto));
         product.setObservation(dto.getObservation());
 
         product = productRepository.save(product);
@@ -116,5 +120,11 @@ public class ProductService {
         product.setObservationUpdatedAt(clearing ? null : LocalDateTime.now());
         product = productRepository.save(product);
         return ProductMapper.toDTO(product);
+    }
+
+    private ProductDefinition resolveDefinition(ProductDTO dto) {
+        if (dto.getDefinition() == null || dto.getDefinition().id() == null) return null;
+        return productDefinitionRepository.findById(dto.getDefinition().id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Definition not found"));
     }
 }

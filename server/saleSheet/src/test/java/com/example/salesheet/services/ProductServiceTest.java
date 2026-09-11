@@ -1,8 +1,13 @@
 package com.example.salesheet.services;
 
 import com.example.salesheet.dto.ProductDTO;
+import com.example.salesheet.dto.ProductDefinitionDTO;
 import com.example.salesheet.entities.Product;
+import com.example.salesheet.entities.ProductDefinition;
 import com.example.salesheet.entities.SpreadSheet;
+import com.example.salesheet.repositories.ProductDefinitionRepository;
+import com.example.salesheet.enums.SpreadSheetStatus;
+import com.example.salesheet.repositories.ProductDefinitionRepository;
 import com.example.salesheet.repositories.ProductRepository;
 import com.example.salesheet.repositories.SpreadsheetRepository;
 import org.junit.jupiter.api.Test;
@@ -24,16 +29,25 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 class ProductServiceTest {
 
     @Mock ProductRepository productRepository;
+    @Mock ProductDefinitionRepository productDefinitionRepository;
     @Mock SpreadsheetRepository spreadsheetRepository;
     @InjectMocks ProductService productService;
+
+    private ProductDefinition buildDefinition(Long id, String name) {
+        var def = new ProductDefinition();
+        def.setId(id);
+        def.setName(name);
+        return def;
+    }
 
     private Product buildProduct(Long id, Long spreadsheetId) {
         var spreadsheet = new SpreadSheet();
         spreadsheet.setId(spreadsheetId);
+        spreadsheet.setStatus(SpreadSheetStatus.ACTIVE);
         var product = new Product();
         product.setId(id);
         product.setReference("REF-001");
-        product.setDefinition("Blusa Floral");
+        product.setDefinition(buildDefinition(1L, "Blusa Floral"));
         product.setPrice(100L);
         product.setSpreadSheet(spreadsheet);
         return product;
@@ -52,20 +66,22 @@ class ProductServiceTest {
     void addProduct_savesAndReturnsDTO() {
         var spreadsheet = new SpreadSheet();
         spreadsheet.setId(1L);
+        var definition = buildDefinition(1L, "Blusa Floral");
         var product = buildProduct(1L, 1L);
 
         when(spreadsheetRepository.findById(1L)).thenReturn(Optional.of(spreadsheet));
+        when(productDefinitionRepository.findById(1L)).thenReturn(Optional.of(definition));
         when(productRepository.save(any())).thenReturn(product);
 
         var dto = new ProductDTO();
         dto.setReference("REF-001");
-        dto.setDefinition("Blusa Floral");
+        dto.setDefinition(new ProductDefinitionDTO(1L, null));
         dto.setPrice(100L);
 
         var result = productService.addProduct(1L, dto);
 
         assertThat(result.getReference()).isEqualTo("REF-001");
-        assertThat(result.getDefinition()).isEqualTo("Blusa Floral");
+        assertThat(result.getDefinition().name()).isEqualTo("Blusa Floral");
         verify(productRepository).save(any());
     }
 
@@ -81,20 +97,21 @@ class ProductServiceTest {
     @Test
     void updateProduct_updatesFieldsAndReturnsDTO() {
         var product = buildProduct(1L, 1L);
+        var newDef = buildDefinition(2L, "Updated");
         when(productRepository.findByIdAndSpreadSheetId(1L, 1L)).thenReturn(Optional.of(product));
+        when(productDefinitionRepository.findById(2L)).thenReturn(Optional.of(newDef));
         when(productRepository.save(any())).thenReturn(product);
 
         var dto = new ProductDTO();
         dto.setReference("REF-NEW");
-        dto.setDefinition("Updated");
+        dto.setDefinition(new ProductDefinitionDTO(2L, null));
         dto.setPrice(200L);
         dto.setObservation("note");
 
         var result = productService.updateProduct(1L, 1L, dto);
 
-        // updateProduct sets reference, price, definition, observation — not sold
         assertThat(product.getReference()).isEqualTo("REF-NEW");
-        assertThat(product.getDefinition()).isEqualTo("Updated");
+        assertThat(product.getDefinition().getName()).isEqualTo("Updated");
         assertThat(product.getPrice()).isEqualTo(200L);
         assertThat(product.getObservation()).isEqualTo("note");
         assertThat(result).isNotNull();

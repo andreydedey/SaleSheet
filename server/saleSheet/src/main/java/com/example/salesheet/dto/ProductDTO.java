@@ -13,7 +13,7 @@ public class ProductDTO {
     private Long id;
     private String reference;
     private Long price;
-    private String definition;
+    private ProductDefinitionDTO definition;
     private Boolean sold;
     private String observation;
     private LocalDateTime observationUpdatedAt;

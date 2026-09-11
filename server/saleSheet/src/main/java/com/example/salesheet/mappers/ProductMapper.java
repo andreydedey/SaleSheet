@@ -1,7 +1,9 @@
 package com.example.salesheet.mappers;
 
 import com.example.salesheet.dto.ProductDTO;
+import com.example.salesheet.dto.ProductDefinitionDTO;
 import com.example.salesheet.entities.Product;
+import com.example.salesheet.entities.ProductDefinition;
 import com.example.salesheet.entities.SpreadSheet;
 
 public class ProductMapper {
@@ -11,7 +13,7 @@ public class ProductMapper {
         dto.setId(entity.getId());
         dto.setReference(entity.getReference());
         dto.setPrice(entity.getPrice());
-        dto.setDefinition(entity.getDefinition());
+        dto.setDefinition(toDefinitionDTO(entity.getDefinition()));
         dto.setSold(entity.isSold());
         dto.setObservation(entity.getObservation());
         dto.setObservationUpdatedAt(entity.getObservationUpdatedAt());
@@ -22,10 +24,14 @@ public class ProductMapper {
         Product product = new Product();
         product.setReference(dto.getReference());
         product.setPrice(dto.getPrice());
-        product.setDefinition(dto.getDefinition());
         product.setSold(dto.getSold() != null && dto.getSold());
         product.setObservation(dto.getObservation());
         product.setSpreadSheet(spreadSheet);
         return product;
+    }
+
+    private static ProductDefinitionDTO toDefinitionDTO(ProductDefinition entity) {
+        if (entity == null) return null;
+        return new ProductDefinitionDTO(entity.getId(), entity.getName());
     }
 }

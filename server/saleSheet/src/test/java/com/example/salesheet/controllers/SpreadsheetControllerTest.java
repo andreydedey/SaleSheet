@@ -4,8 +4,12 @@ import com.example.salesheet.dto.SpreadSheetCreateDTO;
 import com.example.salesheet.dto.SpreadSheetDTO;
 import com.example.salesheet.dto.SpreadSheetListDTO;
 import com.example.salesheet.dto.SpreadSheetPageDTO;
+import com.example.salesheet.entities.User;
+import com.example.salesheet.enums.Role;
+import com.example.salesheet.security.CustomUserPrincipal;
 import com.example.salesheet.services.CustomOAuth2UserService;
 import com.example.salesheet.security.OAuth2LoginSuccessHandler;
+import com.example.salesheet.security.OAuth2LoginFailureHandler;
 import com.example.salesheet.services.SpreadsheetService;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -20,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.salesheet.enums.SpreadSheetStatus;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,19 +45,28 @@ class SpreadsheetControllerTest {
     @MockitoBean SpreadsheetService spreadsheetService;
     @MockitoBean CustomOAuth2UserService customOAuth2UserService;
     @MockitoBean OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    @MockitoBean OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     private SpreadSheetDTO buildSpreadSheetDTO(Long id) {
         return new SpreadSheetDTO(id, "PLN-001", LocalDateTime.now(), null, "DRAFT", null, null);
     }
 
+    private CustomUserPrincipal adminPrincipal() {
+        var user = new User();
+        user.setId(UUID.randomUUID());
+        user.setRole(Role.ADMIN);
+        user.setEmail("admin@test.com");
+        return new CustomUserPrincipal(user, Map.of());
+    }
+
     @Test
-    @WithMockUser(roles = "ADMIN")
     void listSpreadsheets_returnsPage() throws Exception {
         var item = new SpreadSheetListDTO(1L, "PLN-001", "Ana Silva", null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
         var page = new SpreadSheetPageDTO(List.of(item), 1, 1, 0, 20, 1, 1, 0);
         when(spreadsheetService.list(any(), any(), any(), anyBoolean(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/spreadsheets"))
+        mockMvc.perform(get("/spreadsheets")
+                        .with(oauth2Login().oauth2User(adminPrincipal())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("PLN-001"))
                 .andExpect(jsonPath("$.content[0].status").value("ACTIVE"));
