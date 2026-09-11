@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { CannotDeleteSalespersonDialog } from "@/components/CannotDeleteSalespersonDialog"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { getStats, getSalespersons } from "@/lib/api/dashboard"
 import { InviteDialog, InviteButton } from "@/components/InviteDialog"
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
@@ -30,26 +30,30 @@ import { toast } from "sonner"
 import { formatCents } from "@/components/ui/currency-input"
 
 export const Dashboard = () => {
-  const queryClient = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingSalesperson, setEditingSalesperson] = useState<SalespersonDTO | undefined>()
   const [conflictWarning, setConflictWarning] = useState(false)
 
-  const { data: stats } = useQuery({
+  const { data: stats, refetch: refetchStats } = useQuery({
     queryKey: ["dashboard", "stats"],
     queryFn: getStats,
   })
 
-  const { data: salespersonsPage } = useQuery({
+  const { data: salespersonsPage, refetch: refetchSalespersons } = useQuery({
     queryKey: ["dashboard", "salespersons"],
     queryFn: () => getSalespersons(),
   })
+
+  const refetchAll = () => {
+    refetchStats()
+    refetchSalespersons()
+  }
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteSalesperson(id),
     onSuccess: () => {
       toast.success("Revendedor removido.")
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      refetchAll()
     },
     onError: (error: any) => {
       if (error?.response?.status === 409) {
@@ -59,9 +63,6 @@ export const Dashboard = () => {
       }
     },
   })
-
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["dashboard"] })
 
   const openCreate = () => {
     setEditingSalesperson(undefined)
@@ -197,7 +198,7 @@ export const Dashboard = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         salesperson={editingSalesperson}
-        onSuccess={invalidate}
+        onSuccess={refetchAll}
         onDelete={editingSalesperson ? () => deleteMutation.mutate(editingSalesperson.id) : undefined}
       />
       <CannotDeleteSalespersonDialog
