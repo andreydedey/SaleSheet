@@ -38,6 +38,7 @@ public class SpreadsheetRepositoryImpl implements SpreadsheetRepositoryCustom {
                 root.get("name"),
                 userJoin.get("name"),
                 root.get("issuedAt"),
+                root.get("dueDate"),
                 cb.count(productJoin.get("id")),
                 cb.sum(cb.<Long>selectCase()
                         .when(cb.isTrue(productJoin.get("sold")), 1L)

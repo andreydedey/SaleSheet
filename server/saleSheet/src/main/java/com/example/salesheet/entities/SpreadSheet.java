@@ -37,6 +37,8 @@ public class SpreadSheet {
 
     private LocalDateTime issuedAt;
 
+    private LocalDateTime dueDate;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

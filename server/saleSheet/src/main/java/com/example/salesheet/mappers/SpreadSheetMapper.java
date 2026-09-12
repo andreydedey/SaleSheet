@@ -13,6 +13,7 @@ public class SpreadSheetMapper {
         dto.setName(entity.getName());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setIssuedAt(entity.getIssuedAt());
+        dto.setDueDate(entity.getDueDate());
         dto.setStatus(entity.getStatus().name());
         if (entity.getUser() != null) {
             dto.setSalespersonId(entity.getUser().getId());
