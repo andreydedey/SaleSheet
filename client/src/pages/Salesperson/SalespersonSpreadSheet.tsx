@@ -1,11 +1,13 @@
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft } from "lucide-react"
+import { DueDateBanner } from "@/components/DueDateBanner"
 import { useNavigate, useParams, useSearchParams } from "react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getMySpreadsheet } from "@/lib/api/salesperson"
 import { listProducts, markSold, addNote } from "@/lib/api/products"
-import type { SpreadSheetStatus, ProductPageDTO } from "@/types/api"
+import type { SpreadSheetStatus } from "@/types/spreadsheet"
+import type { ProductPageDTO } from "@/types/product"
 import { formatCents } from "@/components/ui/currency-input"
 import { MobileProductCard } from "@/components/MobileProductCard"
 import { FilterPills } from "@/components/FilterPills"
@@ -122,6 +124,7 @@ export const SalespersonSpreadSheet = () => {
           value={soldPercent}
         />
       </div>
+      <DueDateBanner dueDate={spreadsheet?.dueDate ?? null} sellerMode />
       <hr className="-mx-4" />
       <FilterPills
         options={[

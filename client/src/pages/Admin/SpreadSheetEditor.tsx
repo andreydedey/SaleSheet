@@ -32,11 +32,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, useSearchParams } from "react-router"
 import { useState } from "react"
-import type { ProductDTO } from "@/types/api"
+import type { ProductDTO } from "@/types/product"
 import {
   getSpreadsheet,
   updateSpreadsheetSalesperson,
+  updateDueDate,
 } from "@/lib/api/spreadsheets"
+import { dueDateToDate, dateToDueDate } from "@/lib/utils/spreadsheet"
+import { DatePicker } from "@/components/DatePicker"
 import { listProducts, deleteProduct } from "@/lib/api/products"
 import { getSalespersons } from "@/lib/api/dashboard"
 import { toast } from "sonner"
@@ -73,6 +76,13 @@ export const SpreadSheetEditor = () => {
       updateSpreadsheetSalesperson(spreadsheetId, salespersonId),
     onSuccess: () => refetchSpreadsheet(),
     onError: () => toast.error("Erro ao atualizar revendedor."),
+  })
+
+  const dueDateMutation = useMutation({
+    mutationFn: (date: Date | undefined) =>
+      updateDueDate(spreadsheetId, dateToDueDate(date)),
+    onSuccess: () => refetchSpreadsheet(),
+    onError: () => toast.error("Erro ao atualizar data de vencimento."),
   })
 
   const deleteMutation = useMutation({
@@ -134,21 +144,31 @@ export const SpreadSheetEditor = () => {
               A planilha ficará visível para o revendedor somente após ser emitida.
             </p>
           </div>
-          <div className="flex flex-col gap-1 min-w-56">
-            <label className="text-sm font-medium">Revendedor</label>
-            <Select
-              value={spreadsheet?.salespersonId ? String(spreadsheet.salespersonId) : undefined}
-              onValueChange={(v) => salespersonMutation.mutate(v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o revendedor" />
-              </SelectTrigger>
-              <SelectContent>
-                {salespersons.map((s) => (
-                  <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex gap-4 items-start">
+            <div className="flex flex-col gap-1 min-w-56">
+              <label className="text-sm font-medium">Revendedor</label>
+              <Select
+                value={spreadsheet?.salespersonId ? String(spreadsheet.salespersonId) : undefined}
+                onValueChange={(v) => salespersonMutation.mutate(v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o revendedor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {salespersons.map((s) => (
+                    <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Vencimento</label>
+              <DatePicker
+                value={dueDateToDate(spreadsheet?.dueDate ?? null)}
+                onChange={(date) => dueDateMutation.mutate(date)}
+                fromDate={new Date()}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

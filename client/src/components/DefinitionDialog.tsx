@@ -15,7 +15,7 @@ import { createDefinition, updateDefinition } from "@/lib/api/definitions"
 import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import type { ProductDefinitionListDTO } from "@/types/api"
+import type { ProductDefinitionListDTO } from "@/types/definition"
 
 const schema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),

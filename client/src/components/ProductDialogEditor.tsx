@@ -27,7 +27,7 @@ import { listDefinitions } from "@/lib/api/definitions"
 import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import type { ProductDTO } from "@/types/api"
+import type { ProductDTO } from "@/types/product"
 
 interface ProductDialogEditorProps {
   spreadsheetId: number
@@ -79,9 +79,13 @@ export const ProductDialogEditor: React.FC<ProductDialogEditorProps> = ({
         ? updateProduct(spreadsheetId, product!.id!, payload)
         : addProduct(spreadsheetId, payload)
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success(isEdit ? "Produto atualizado." : "Produto adicionado.")
-      reset()
+      reset({
+        reference: "",
+        definitionId: variables.definitionId,
+        price: 0,
+      })
       onOpenChange?.(false)
       onSaved?.()
     },

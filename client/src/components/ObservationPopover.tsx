@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { addNote } from "@/lib/api/products"
-import type { ProductDTO } from "@/types/api"
+import type { ProductDTO } from "@/types/product"
 
 interface ObservationPopoverProps {
   spreadsheetId: number

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api"
-import type { ProductDefinitionDTO, ProductDefinitionListDTO } from "@/types/api"
+import type { ProductDefinitionDTO, ProductDefinitionListDTO } from "@/types/definition"
 
 export function listDefinitions() {
   return api

@@ -3,7 +3,7 @@ import type {
   SpreadSheetDTO,
   SpreadSheetStatus,
   SpreadSheetPageDTO,
-} from "@/types/api"
+} from "@/types/spreadsheet"
 
 type ListParams = {
   salespersonId?: string
