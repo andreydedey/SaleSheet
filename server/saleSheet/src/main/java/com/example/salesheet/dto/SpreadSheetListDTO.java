@@ -15,6 +15,7 @@ public class SpreadSheetListDTO {
     private String name;
     private String salespersonName;
     private LocalDateTime issuedAt;
+    private LocalDateTime dueDate;
     private long totalPieces;
     private long soldPieces;
     private long totalSold;

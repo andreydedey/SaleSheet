@@ -93,6 +93,14 @@ public class SpreadsheetService {
         return SpreadSheetMapper.toDTO(spreadSheet);
     }
 
+    public SpreadSheetDTO updateDueDate(Long id, LocalDateTime dueDate) {
+        var spreadSheet = spreadsheetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));
+        spreadSheet.setDueDate(dueDate);
+        spreadSheet = spreadsheetRepository.save(spreadSheet);
+        return SpreadSheetMapper.toDTO(spreadSheet);
+    }
+
     public SpreadSheetDTO updateSalesperson(Long id, UUID salespersonId) {
         var spreadSheet = spreadsheetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));

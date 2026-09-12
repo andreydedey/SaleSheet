@@ -37,6 +37,7 @@ export type SpreadSheetListDTO = {
   name: string
   salespersonName: string | null
   issuedAt: string | null
+  dueDate: string | null
   totalPieces: number
   soldPieces: number
   totalSold: number
@@ -48,6 +49,7 @@ export type SpreadSheetDTO = {
   name: string
   createdAt: string
   issuedAt: string | null
+  dueDate: string | null
   status: SpreadSheetStatus
   salespersonId: string | null
   salespersonName: string | null

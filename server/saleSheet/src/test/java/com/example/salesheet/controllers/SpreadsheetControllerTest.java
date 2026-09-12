@@ -48,7 +48,7 @@ class SpreadsheetControllerTest {
     @MockitoBean OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     private SpreadSheetDTO buildSpreadSheetDTO(Long id) {
-        return new SpreadSheetDTO(id, "PLN-001", LocalDateTime.now(), null, "DRAFT", null, null);
+        return new SpreadSheetDTO(id, "PLN-001", LocalDateTime.now(), null, null, "DRAFT", null, null);
     }
 
     private CustomUserPrincipal adminPrincipal() {
@@ -61,7 +61,7 @@ class SpreadsheetControllerTest {
 
     @Test
     void listSpreadsheets_returnsPage() throws Exception {
-        var item = new SpreadSheetListDTO(1L, "PLN-001", "Ana Silva", null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
+        var item = new SpreadSheetListDTO(1L, "PLN-001", "Ana Silva", null, null, 5L, 2L, 89900L, SpreadSheetStatus.ACTIVE);
         var page = new SpreadSheetPageDTO(List.of(item), 1, 1, 0, 20, 1, 1, 0);
         when(spreadsheetService.list(any(), any(), any(), anyBoolean(), any())).thenReturn(page);
 
@@ -111,7 +111,7 @@ class SpreadsheetControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateStatus_returnsUpdatedSpreadsheet() throws Exception {
-        var updated = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), null, "ACTIVE", null, null);
+        var updated = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), null, null, "ACTIVE", null, null);
         when(spreadsheetService.updateStatus(eq(1L), eq(SpreadSheetStatus.ACTIVE))).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1")
@@ -149,7 +149,7 @@ class SpreadsheetControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void emitSpreadsheet_returnsUpdatedSpreadsheet() throws Exception {
-        var emitted = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), LocalDateTime.now(), "ACTIVE", null, null);
+        var emitted = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), LocalDateTime.now(), null, "ACTIVE", null, null);
         when(spreadsheetService.emit(1L)).thenReturn(emitted);
 
         mockMvc.perform(post("/spreadsheets/1/emit").with(csrf()))
@@ -161,7 +161,7 @@ class SpreadsheetControllerTest {
     @WithMockUser(roles = "ADMIN")
     void updateSalesperson_returnsUpdatedSpreadsheet() throws Exception {
         var salespersonId = UUID.randomUUID();
-        var updated = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), null, "DRAFT", salespersonId, "Carlos");
+        var updated = new SpreadSheetDTO(1L, "PLN-001", LocalDateTime.now(), null, null, "DRAFT", salespersonId, "Carlos");
         when(spreadsheetService.updateSalesperson(eq(1L), eq(salespersonId))).thenReturn(updated);
 
         mockMvc.perform(patch("/spreadsheets/1/salesperson")

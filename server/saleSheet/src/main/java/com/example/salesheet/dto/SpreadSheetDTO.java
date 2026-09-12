@@ -15,6 +15,7 @@ public class SpreadSheetDTO {
     private String name;
     private LocalDateTime createdAt;
     private LocalDateTime issuedAt;
+    private LocalDateTime dueDate;
     private String status;
     private UUID salespersonId;
     private String salespersonName;
