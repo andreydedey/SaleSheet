@@ -1,4 +1,5 @@
 import * as React from "react"
+import { cn } from "@/lib/utils"
 import { CalendarClock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -14,22 +15,24 @@ interface DatePickerProps {
   fromDate?: Date
   trigger?: React.ReactNode
   onClear?: () => void
+  className?: string
 }
 
 export function DatePicker({
   value,
   onChange,
-  placeholder = "dd/mm/aaaa",
+  placeholder = "Selecione a data",
   disabled,
   fromDate,
   trigger,
   onClear,
+  className,
 }: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         {trigger ?? (
-          <Button variant="outline" disabled={disabled} className="min-w-40 justify-start font-normal">
+          <Button variant="outline" disabled={disabled} className={cn("min-w-40 justify-start font-normal", className)}>
             <CalendarClock className="size-4 text-muted-foreground" />
             {value ? dayjs(value).format("DD/MM/YYYY") : <span className="text-muted-foreground">{placeholder}</span>}
           </Button>

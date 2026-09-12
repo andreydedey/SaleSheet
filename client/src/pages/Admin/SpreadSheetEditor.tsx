@@ -137,15 +137,15 @@ export const SpreadSheetEditor = () => {
         <EmitSpreadsheetDialog spreadsheetId={spreadsheetId} disabled={!canEmit} />
       </div>
       <Card>
-        <CardContent className="flex justify-between items-center">
+        <CardContent className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
             <p className="font-semibold text-base">Revendedor</p>
             <p className="text-muted-foreground text-sm">
               A planilha ficará visível para o revendedor somente após ser emitida.
             </p>
           </div>
-          <div className="flex gap-4 items-start">
-            <div className="flex flex-col gap-1 min-w-56">
+          <div className="flex flex-col md:flex-row gap-4 md:items-start">
+            <div className="flex flex-col gap-1 md:min-w-56">
               <label className="text-sm font-medium">Revendedor</label>
               <Select
                 value={spreadsheet?.salespersonId ? String(spreadsheet.salespersonId) : undefined}
@@ -167,6 +167,7 @@ export const SpreadSheetEditor = () => {
                 value={dueDateToDate(spreadsheet?.dueDate ?? null)}
                 onChange={(date) => dueDateMutation.mutate(date)}
                 fromDate={new Date()}
+                className="w-full md:w-auto"
               />
             </div>
           </div>
