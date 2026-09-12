@@ -16,6 +16,9 @@ import { CreateSpreadSheetDialog } from "@/components/CreateSpreadSheetDialog"
 import { useNavigate, useSearchParams } from "react-router"
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { ChevronDown, Search } from "lucide-react"
+import { formatDueDate } from "@/lib/utils/spreadsheet"
+import { DueDateChip } from "@/components/DueDateChip"
+import dayjs from "dayjs"
 import { Button } from "@/components/ui/button"
 import { listSpreadsheets } from "@/lib/api/spreadsheets"
 import { getSalespersons } from "@/lib/api/dashboard"
@@ -37,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { SpreadSheetStatus } from "@/types/api"
+import type { SpreadSheetStatus } from "@/types/spreadsheet"
 
 const statusLabel: Record<SpreadSheetStatus, string> = {
   DRAFT: "Rascunho",
@@ -221,6 +224,7 @@ export const SpreadSheet = () => {
                       <p className="font-bold">{formatCents(s.totalSold)}</p>
                     </div>
                   </div>
+                  <DueDateChip dueDate={s.dueDate} />
                 </CardContent>
               </Card>
             ))}
@@ -264,12 +268,11 @@ export const SpreadSheet = () => {
                 </Badge>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm mb-2">
+                <p className="text-muted-foreground text-sm">
                   Emitida em{" "}
-                  {s.issuedAt
-                    ? new Date(s.issuedAt).toLocaleDateString("pt-BR")
-                    : "-"}
+                  {s.issuedAt ? dayjs(s.issuedAt).format("DD/MM/YYYY") : "-"}
                 </p>
+                <DueDateChip dueDate={s.dueDate} />
                 <div className="grid grid-cols-3 grid-rows-2 w-fit">
                   <span>Peças</span>
                   <span>Vendidas</span>
@@ -345,13 +348,14 @@ export const SpreadSheet = () => {
               <TableHead>Peças</TableHead>
               <TableHead>Vendidas</TableHead>
               <TableHead>Total Vendido</TableHead>
+              <TableHead>Vencimento</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {spreadsheets.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-48">
+                <TableCell colSpan={8} className="h-48">
                   <Empty>
                     <EmptyHeader>
                       <EmptyMedia>
@@ -392,6 +396,15 @@ export const SpreadSheet = () => {
                     {s.soldPieces}
                   </TableCell>
                   <TableCell className="font-semibold">{formatCents(s.totalSold)}</TableCell>
+                  <TableCell>
+                    {!s.dueDate ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : s.status !== "ACTIVE" ? (
+                      <span className="text-muted-foreground">{formatDueDate(s.dueDate)}</span>
+                    ) : (
+                      <DueDateChip dueDate={s.dueDate} />
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Badge className={`${statusStyle[s.status]} font-semibold`}>
                       {statusLabel[s.status]}

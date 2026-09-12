@@ -25,7 +25,7 @@ import { listDefinitionsDetailed, deleteDefinition } from "@/lib/api/definitions
 import { DefinitionDialog } from "@/components/DefinitionDialog"
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
 import { useState } from "react"
-import type { ProductDefinitionListDTO } from "@/types/api"
+import type { ProductDefinitionListDTO } from "@/types/definition"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Tags } from "lucide-react"

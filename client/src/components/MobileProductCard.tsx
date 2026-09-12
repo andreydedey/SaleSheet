@@ -12,7 +12,7 @@ import { faEdit, faTrashCan } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { cn } from "@/lib/utils"
 import { formatCents } from "@/components/ui/currency-input"
-import type { ProductDTO } from "@/types/api"
+import type { ProductDTO } from "@/types/product"
 
 interface MobileProductCardProps {
   product: ProductDTO

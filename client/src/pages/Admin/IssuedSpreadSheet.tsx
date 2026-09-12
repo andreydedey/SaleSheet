@@ -32,7 +32,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { getSpreadsheet, updateSpreadsheetSalesperson } from "@/lib/api/spreadsheets"
+import { getSpreadsheet, updateSpreadsheetSalesperson, updateDueDate } from "@/lib/api/spreadsheets"
+import { getCountdownInfo, countdownColors, dueDateToDate, dateToDueDate } from "@/lib/utils/spreadsheet"
+import { DatePicker } from "@/components/DatePicker"
+import { DueDateBanner } from "@/components/DueDateBanner"
 import { getSalespersons } from "@/lib/api/dashboard"
 import { listProducts, markSold, deleteProduct, addNote } from "@/lib/api/products"
 import { ProductDialogEditor } from "@/components/ProductDialogEditor"
@@ -40,7 +43,7 @@ import { ObservationPopover } from "@/components/ObservationPopover"
 import { MobileProductCard } from "@/components/MobileProductCard"
 import { FilterPills } from "@/components/FilterPills"
 import { useState } from "react"
-import { ChevronLeft, UserRound } from "lucide-react"
+import { CalendarClock, ChevronLeft, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -49,7 +52,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { ProductDTO, ProductPageDTO } from "@/types/api"
+import type { ProductDTO, ProductPageDTO } from "@/types/product"
 
 type ProductFilter = "ALL" | "SOLD" | "UNSOLD"
 
@@ -129,6 +132,18 @@ export const IssuedSpreadSheet = () => {
   })
 
   const products = productsPage?.content ?? []
+  const dueDateMutation = useMutation({
+    mutationFn: (date: Date | undefined) =>
+      updateDueDate(spreadsheetId, dateToDueDate(date)),
+    onSuccess: () => {
+      refetchSpreadsheet()
+      toast.success("Data de vencimento atualizada.")
+    },
+    onError: () => toast.error("Erro ao atualizar data de vencimento."),
+  })
+
+  const countdown = getCountdownInfo(spreadsheet?.dueDate ?? null)
+
   const [editingProduct, setEditingProduct] = useState<ProductDTO | undefined>()
   const [editOpen, setEditOpen] = useState(false)
   const [changingSalesperson, setChangingSalesperson] = useState(false)
@@ -193,7 +208,7 @@ export const IssuedSpreadSheet = () => {
       {/* Desktop: title + status */}
       <div className="hidden md:flex justify-between items-start">
         <div className="space-y-2">
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center flex-wrap">
             <h1 className="text-2xl font-bold">
               Planilha - {spreadsheet?.name}
             </h1>
@@ -201,6 +216,33 @@ export const IssuedSpreadSheet = () => {
               <Badge className="bg-green-50 text-green-700">Emitida</Badge>
             ) : (
               <Badge className="bg-gray-100 text-gray-600">Inativa</Badge>
+            )}
+            {countdown && (
+              <DatePicker
+                value={dueDateToDate(spreadsheet?.dueDate ?? null)}
+                onChange={(date) => dueDateMutation.mutate(date)}
+                onClear={() => dueDateMutation.mutate(undefined)}
+                trigger={
+                  <Badge
+                    className={`cursor-pointer ${countdownColors[countdown.color].bg} ${countdownColors[countdown.color].text} border ${countdownColors[countdown.color].border} hover:opacity-80`}
+                  >
+                    <CalendarClock className="size-3" />
+                    {countdown.text}
+                  </Badge>
+                }
+              />
+            )}
+            {!countdown && spreadsheet?.status === "ACTIVE" && (
+              <DatePicker
+                value={undefined}
+                onChange={(date) => dueDateMutation.mutate(date)}
+                trigger={
+                  <Button variant="outline" size="sm">
+                    <CalendarClock className="size-4" />
+                    Definir vencimento
+                  </Button>
+                }
+              />
             )}
           </div>
           <h3 className="text-muted-foreground text-sm">
@@ -306,6 +348,33 @@ export const IssuedSpreadSheet = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Mobile: due date banner */}
+      <div className="md:hidden">
+        {countdown ? (
+          <DatePicker
+            value={dueDateToDate(spreadsheet?.dueDate ?? null)}
+            onChange={(date) => dueDateMutation.mutate(date)}
+            onClear={() => dueDateMutation.mutate(undefined)}
+            trigger={
+              <div className="cursor-pointer">
+                <DueDateBanner dueDate={spreadsheet?.dueDate ?? null} />
+              </div>
+            }
+          />
+        ) : spreadsheet?.status === "ACTIVE" ? (
+          <DatePicker
+            value={undefined}
+            onChange={(date) => dueDateMutation.mutate(date)}
+            trigger={
+              <Button variant="outline" className="w-full">
+                <CalendarClock className="size-4" />
+                Definir vencimento
+              </Button>
+            }
+          />
+        ) : null}
       </div>
 
       {/* Mobile: salesperson section */}

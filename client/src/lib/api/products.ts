@@ -1,5 +1,5 @@
 import { api } from "@/lib/api"
-import type { ProductDTO, ProductPageDTO } from "@/types/api"
+import type { ProductDTO, ProductPageDTO } from "@/types/product"
 
 export function listProducts(
   spreadsheetId: number,

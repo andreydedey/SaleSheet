@@ -14,9 +14,11 @@ import { getMyStats, getMySpreadsheets } from "@/lib/api/salesperson"
 import { useAuth } from "@/context/AuthContext"
 import { Link } from "react-router"
 import { formatCents } from "@/components/ui/currency-input"
-import type { SpreadSheetStatus } from "@/types/api"
+import type { SpreadSheetStatus } from "@/types/spreadsheet"
 import { FilterPills } from "@/components/FilterPills"
 import { SearchX } from "lucide-react"
+import { DueDateChip } from "@/components/DueDateChip"
+import dayjs from "dayjs"
 import {
   Empty,
   EmptyDescription,
@@ -135,10 +137,9 @@ export const Home = () => {
           <CardContent className="space-y-2">
             <p className="text-muted-foreground">
               Emitida em{" "}
-              {spreadsheet.issuedAt
-                ? new Date(spreadsheet.issuedAt).toLocaleDateString("pt-BR")
-                : "-"}
+              {spreadsheet.issuedAt ? dayjs(spreadsheet.issuedAt).format("DD/MM/YYYY") : "-"}
             </p>
+            <DueDateChip dueDate={spreadsheet.dueDate} sellerMode />
             <div className="flex border rounded-md *:flex-1 *:border-r *:last:border-r-0 *:p-2">
               <div>
                 <p className="text-muted-foreground">Peças</p>

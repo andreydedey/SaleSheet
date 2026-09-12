@@ -17,7 +17,7 @@ import { useEffect } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import type { SalespersonDTO } from "@/types/api"
+import type { SalespersonDTO } from "@/types/salesperson"
 import { faPlus } from "@fortawesome/free-solid-svg-icons"
 
 const schema = z.object({

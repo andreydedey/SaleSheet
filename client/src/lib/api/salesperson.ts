@@ -2,9 +2,9 @@ import { api } from "@/lib/api"
 import type {
   SpreadSheetDTO,
   SpreadSheetStatus,
-  SalespersonStatsDTO,
   SpreadSheetPageDTO,
-} from "@/types/api"
+} from "@/types/spreadsheet"
+import type { SalespersonStatsDTO } from "@/types/salesperson"
 
 type ListParams = {
   status?: SpreadSheetStatus

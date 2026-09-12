@@ -1,5 +1,5 @@
 import { CalendarClock } from "lucide-react"
-import { getCountdownInfo, getSellerCountdownInfo, countdownColors, formatDueDate } from "@/lib/spreadsheet-utils"
+import { getCountdownInfo, getSellerCountdownInfo, countdownColors, formatDueDate } from "@/lib/utils/spreadsheet"
 
 interface DueDateBannerProps {
   dueDate: string | null

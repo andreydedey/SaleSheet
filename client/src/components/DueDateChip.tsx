@@ -1,5 +1,5 @@
 import { CalendarClock } from "lucide-react"
-import { getCountdownInfo, getSellerCountdownInfo, countdownColors } from "@/lib/spreadsheet-utils"
+import { getCountdownInfo, getSellerCountdownInfo, countdownColors } from "@/lib/utils/spreadsheet"
 
 interface DueDateChipProps {
   dueDate: string | null
