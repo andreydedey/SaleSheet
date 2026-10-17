@@ -200,11 +200,16 @@ export const IssuedSpreadSheet = () => {
             <p className="text-sm text-muted-foreground">{spreadsheet?.name}</p>
           </div>
         </div>
-        {spreadsheet?.status === "ACTIVE" ? (
-          <Badge className="bg-green-50 text-green-700">Emitida</Badge>
-        ) : (
-          <Badge className="bg-gray-100 text-gray-600">Inativa</Badge>
-        )}
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground" onClick={() => setRenameOpen(true)}>
+            <Pencil className="size-3.5" />
+          </Button>
+          {spreadsheet?.status === "ACTIVE" ? (
+            <Badge className="bg-green-50 text-green-700">Emitida</Badge>
+          ) : (
+            <Badge className="bg-gray-100 text-gray-600">Inativa</Badge>
+          )}
+        </div>
       </div>
 
       {/* Desktop: title + status */}
