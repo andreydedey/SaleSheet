@@ -183,28 +183,24 @@ export const IssuedSpreadSheet = () => {
       </div>
 
       {/* Mobile: back header */}
-      <div className="md:hidden flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => navigate("/spreadsheets")}
-            className="size-10 rounded-full shrink-0"
-          >
-            <ChevronLeft className="size-5" />
-          </Button>
-          <div className="min-w-0">
-            <h1 className="text-lg font-bold text-foreground truncate">
-              {spreadsheet?.salespersonName ?? spreadsheet?.name}
-            </h1>
-            <div className="flex items-center gap-1">
-              <p className="text-sm text-muted-foreground truncate">{spreadsheet?.name}</p>
-              <Button variant="ghost" size="icon" className="size-6 text-muted-foreground shrink-0" onClick={() => setRenameOpen(true)}>
-                <Pencil className="size-3" />
-              </Button>
-            </div>
-          </div>
+      <div className="md:hidden flex items-center gap-2">
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => navigate("/spreadsheets")}
+          className="size-10 rounded-full shrink-0"
+        >
+          <ChevronLeft className="size-5" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg font-bold text-foreground truncate">
+            {spreadsheet?.salespersonName ?? spreadsheet?.name}
+          </h1>
+          <p className="text-sm text-muted-foreground truncate">{spreadsheet?.name}</p>
         </div>
+        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground shrink-0" onClick={() => setRenameOpen(true)}>
+          <Pencil className="size-4" />
+        </Button>
         {spreadsheet?.status === "ACTIVE" ? (
           <Badge className="bg-green-50 text-green-700 shrink-0">Emitida</Badge>
         ) : (
