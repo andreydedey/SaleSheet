@@ -96,10 +96,10 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
         <Card className="md:min-w-xs">
-          <CardHeader className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <CardHeader className="flex items-start justify-between">
+            <div className="space-y-1.5">
               <CardDescription>Total vendido</CardDescription>
-              <div className="flex rounded-md border text-xs overflow-hidden">
+              <div className="flex rounded-md border text-xs overflow-hidden w-fit">
                 <button
                   onClick={() => setSoldFilter("all")}
                   className={`px-2 py-0.5 transition-colors ${soldFilter === "all" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"}`}
