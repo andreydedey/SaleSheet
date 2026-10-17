@@ -45,9 +45,10 @@ export const Definitions = () => {
       toast.success("Definição removida.")
       refetch()
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.detail || error?.response?.data?.message
-      if (error?.response?.status === 409) {
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { status?: number; data?: { detail?: string; message?: string } } }
+      const message = axiosError?.response?.data?.detail || axiosError?.response?.data?.message
+      if (axiosError?.response?.status === 409) {
         toast.error("Não é possível excluir esta definição.", { description: message })
       } else {
         toast.error("Erro ao remover definição.")

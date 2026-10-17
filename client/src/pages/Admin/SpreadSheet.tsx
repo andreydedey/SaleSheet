@@ -70,7 +70,7 @@ export const SpreadSheet = () => {
     (key: string, value: string) => {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev)
-        value ? next.set(key, value) : next.delete(key)
+        if (value) { next.set(key, value) } else { next.delete(key) }
         return next
       }, { replace: true })
     },
