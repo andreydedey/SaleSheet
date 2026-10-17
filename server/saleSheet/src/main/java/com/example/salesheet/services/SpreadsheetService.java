@@ -101,6 +101,14 @@ public class SpreadsheetService {
         return SpreadSheetMapper.toDTO(spreadSheet);
     }
 
+    public SpreadSheetDTO updateName(Long id, String name) {
+        var spreadSheet = spreadsheetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));
+        spreadSheet.setName(name);
+        spreadSheet = spreadsheetRepository.save(spreadSheet);
+        return SpreadSheetMapper.toDTO(spreadSheet);
+    }
+
     public SpreadSheetDTO updateSalesperson(Long id, UUID salespersonId) {
         var spreadSheet = spreadsheetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spreadsheet not found"));

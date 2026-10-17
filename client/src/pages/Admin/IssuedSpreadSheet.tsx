@@ -43,7 +43,7 @@ import { ObservationPopover } from "@/components/ObservationPopover"
 import { MobileProductCard } from "@/components/MobileProductCard"
 import { FilterPills } from "@/components/FilterPills"
 import { useState } from "react"
-import { CalendarClock, ChevronLeft, UserRound } from "lucide-react"
+import { CalendarClock, ChevronLeft, Pencil, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -52,6 +52,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { RenameSpreadsheetDialog } from "@/components/RenameSpreadsheetDialog"
 import type { ProductDTO, ProductPageDTO } from "@/types/product"
 
 type ProductFilter = "ALL" | "SOLD" | "UNSOLD"
@@ -148,6 +149,7 @@ export const IssuedSpreadSheet = () => {
   const [editOpen, setEditOpen] = useState(false)
   const [changingSalesperson, setChangingSalesperson] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<ProductDTO | undefined>()
+  const [renameOpen, setRenameOpen] = useState(false)
 
   const openEdit = (product: ProductDTO) => {
     setEditingProduct(product)
@@ -181,27 +183,28 @@ export const IssuedSpreadSheet = () => {
       </div>
 
       {/* Mobile: back header */}
-      <div className="md:hidden flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => navigate("/spreadsheets")}
-            className="size-10 rounded-full"
-          >
-            <ChevronLeft className="size-5" />
-          </Button>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">
-              {spreadsheet?.salespersonName ?? spreadsheet?.name}
-            </h1>
-            <p className="text-sm text-muted-foreground">{spreadsheet?.name}</p>
-          </div>
+      <div className="md:hidden flex items-center gap-2">
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => navigate("/spreadsheets")}
+          className="size-10 rounded-full shrink-0"
+        >
+          <ChevronLeft className="size-5" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg font-bold text-foreground truncate">
+            {spreadsheet?.salespersonName ?? spreadsheet?.name}
+          </h1>
+          <p className="text-sm text-muted-foreground truncate">{spreadsheet?.name}</p>
         </div>
+        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground shrink-0" onClick={() => setRenameOpen(true)}>
+          <Pencil className="size-4" />
+        </Button>
         {spreadsheet?.status === "ACTIVE" ? (
-          <Badge className="bg-green-50 text-green-700">Emitida</Badge>
+          <Badge className="bg-green-50 text-green-700 shrink-0">Emitida</Badge>
         ) : (
-          <Badge className="bg-gray-100 text-gray-600">Inativa</Badge>
+          <Badge className="bg-gray-100 text-gray-600 shrink-0">Inativa</Badge>
         )}
       </div>
 
@@ -212,6 +215,9 @@ export const IssuedSpreadSheet = () => {
             <h1 className="text-2xl font-bold">
               Planilha - {spreadsheet?.name}
             </h1>
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => setRenameOpen(true)}>
+              <Pencil className="size-3.5" />
+            </Button>
             {spreadsheet?.status === "ACTIVE" ? (
               <Badge className="bg-green-50 text-green-700">Emitida</Badge>
             ) : (
@@ -551,6 +557,14 @@ export const IssuedSpreadSheet = () => {
         open={editOpen}
         onOpenChange={setEditOpen}
         onSaved={refetchProducts}
+      />
+
+      <RenameSpreadsheetDialog
+        spreadsheetId={spreadsheetId}
+        currentName={spreadsheet?.name}
+        open={renameOpen}
+        onOpenChange={setRenameOpen}
+        onSuccess={refetchSpreadsheet}
       />
     </div>
   )

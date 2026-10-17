@@ -20,6 +20,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT COALESCE(SUM(p.price), 0) FROM Product p WHERE p.sold = true")
     long sumSoldPrices();
 
+    @Query("SELECT COALESCE(SUM(p.price), 0) FROM Product p WHERE p.sold = true AND p.spreadSheet.status = com.example.salesheet.enums.SpreadSheetStatus.ACTIVE")
+    long sumSoldPricesByActiveSpreadsheet();
+
     @Query("""
             SELECT p.sold, COUNT(p)
             FROM Product p

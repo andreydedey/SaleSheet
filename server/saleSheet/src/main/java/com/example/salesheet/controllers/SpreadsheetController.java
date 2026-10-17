@@ -4,6 +4,7 @@ import com.example.salesheet.dto.SpreadSheetCreateDTO;
 import com.example.salesheet.dto.SpreadSheetDTO;
 import com.example.salesheet.dto.SpreadSheetPageDTO;
 import com.example.salesheet.dto.UpdateDueDateDTO;
+import com.example.salesheet.dto.UpdateNameDTO;
 import com.example.salesheet.dto.UpdateSalespersonDTO;
 import com.example.salesheet.dto.UpdateStatusDTO;
 import com.example.salesheet.enums.Role;
@@ -77,6 +78,14 @@ public class SpreadsheetController {
             @PathVariable Long id,
             @RequestBody UpdateDueDateDTO dto) {
         return ResponseEntity.ok(spreadsheetService.updateDueDate(id, dto.dueDate()));
+    }
+
+    @PatchMapping("/{id}/name")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SpreadSheetDTO> updateName(
+            @PathVariable Long id,
+            @RequestBody UpdateNameDTO dto) {
+        return ResponseEntity.ok(spreadsheetService.updateName(id, dto.name()));
     }
 
     @PatchMapping("/{id}/salesperson")

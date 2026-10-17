@@ -33,6 +33,7 @@ export const Dashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingSalesperson, setEditingSalesperson] = useState<SalespersonDTO | undefined>()
   const [conflictWarning, setConflictWarning] = useState(false)
+  const [soldFilter, setSoldFilter] = useState<"all" | "active">("all")
 
   const { data: stats, refetch: refetchStats } = useQuery({
     queryKey: ["dashboard", "stats"],
@@ -75,6 +76,10 @@ export const Dashboard = () => {
     setDialogOpen(true)
   }
 
+  const totalSoldValue = soldFilter === "active"
+    ? (stats?.totalSoldActive ?? 0)
+    : (stats?.totalSold ?? 0)
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
@@ -91,12 +96,28 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
         <Card className="md:min-w-xs">
-          <CardHeader className="flex items-center justify-between">
-            <CardDescription>Total vendido</CardDescription>
+          <CardHeader className="flex items-start justify-between">
+            <div className="space-y-1.5">
+              <CardDescription>Total vendido</CardDescription>
+              <div className="flex rounded-md border text-xs overflow-hidden w-fit">
+                <button
+                  onClick={() => setSoldFilter("all")}
+                  className={`px-2 py-0.5 transition-colors ${soldFilter === "all" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  Todas
+                </button>
+                <button
+                  onClick={() => setSoldFilter("active")}
+                  className={`px-2 py-0.5 transition-colors border-l ${soldFilter === "active" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  Ativas
+                </button>
+              </div>
+            </div>
             <FontAwesomeIcon className="text-green-600" icon={faDollarSign} />
           </CardHeader>
           <CardContent className="text-xl md:text-3xl font-bold">
-            {formatCents(stats?.totalSold ?? 0)}
+            {formatCents(totalSoldValue)}
           </CardContent>
         </Card>
         <Card className="col-span-2 md:col-span-1 md:min-w-xs">
