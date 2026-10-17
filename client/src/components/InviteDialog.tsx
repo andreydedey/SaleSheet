@@ -69,8 +69,8 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
       onOpenChange(false)
       onSuccess?.()
     },
-    onError: (error: any) => {
-      const detail = error?.response?.data?.message
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { message?: string } } })?.response?.data?.message
       toast.error(isEdit ? "Erro ao atualizar revendedor." : "Erro ao convidar revendedor.", {
         description: detail,
       })

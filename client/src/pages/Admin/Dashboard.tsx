@@ -55,8 +55,9 @@ export const Dashboard = () => {
       toast.success("Revendedor removido.")
       refetchAll()
     },
-    onError: (error: any) => {
-      if (error?.response?.status === 409) {
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { status?: number } }
+      if (axiosError?.response?.status === 409) {
         setConflictWarning(true)
       } else {
         toast.error("Erro ao remover revendedor.")
