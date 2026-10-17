@@ -12,4 +12,4 @@ if ! $COMPOSE ps --services --filter status=running | grep -q "^db$"; then
   done
 fi
 
-JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./mvnw spring-boot:run
+JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
