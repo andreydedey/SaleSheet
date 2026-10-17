@@ -33,6 +33,7 @@ export const Dashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingSalesperson, setEditingSalesperson] = useState<SalespersonDTO | undefined>()
   const [conflictWarning, setConflictWarning] = useState(false)
+  const [soldFilter, setSoldFilter] = useState<"all" | "active">("all")
 
   const { data: stats, refetch: refetchStats } = useQuery({
     queryKey: ["dashboard", "stats"],
@@ -55,8 +56,9 @@ export const Dashboard = () => {
       toast.success("Revendedor removido.")
       refetchAll()
     },
-    onError: (error: any) => {
-      if (error?.response?.status === 409) {
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { status?: number } }
+      if (axiosError?.response?.status === 409) {
         setConflictWarning(true)
       } else {
         toast.error("Erro ao remover revendedor.")
@@ -73,6 +75,10 @@ export const Dashboard = () => {
     setEditingSalesperson(person)
     setDialogOpen(true)
   }
+
+  const totalSoldValue = soldFilter === "active"
+    ? (stats?.totalSoldActive ?? 0)
+    : (stats?.totalSold ?? 0)
 
   return (
     <>
@@ -91,11 +97,27 @@ export const Dashboard = () => {
         </Card>
         <Card className="md:min-w-xs">
           <CardHeader className="flex items-center justify-between">
-            <CardDescription>Total vendido</CardDescription>
+            <div className="flex items-center gap-2">
+              <CardDescription>Total vendido</CardDescription>
+              <div className="flex rounded-md border text-xs overflow-hidden">
+                <button
+                  onClick={() => setSoldFilter("all")}
+                  className={`px-2 py-0.5 transition-colors ${soldFilter === "all" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  Todas
+                </button>
+                <button
+                  onClick={() => setSoldFilter("active")}
+                  className={`px-2 py-0.5 transition-colors border-l ${soldFilter === "active" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  Ativas
+                </button>
+              </div>
+            </div>
             <FontAwesomeIcon className="text-green-600" icon={faDollarSign} />
           </CardHeader>
           <CardContent className="text-xl md:text-3xl font-bold">
-            {formatCents(stats?.totalSold ?? 0)}
+            {formatCents(totalSoldValue)}
           </CardContent>
         </Card>
         <Card className="col-span-2 md:col-span-1 md:min-w-xs">

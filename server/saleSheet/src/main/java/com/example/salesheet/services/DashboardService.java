@@ -26,7 +26,8 @@ public class DashboardService {
         long totalSalespersons = userRepository.countByRole(Role.SALESPERSON);
         long activeSpreadsheets = spreadsheetRepository.countByStatus(SpreadSheetStatus.ACTIVE);
         long totalSold = productRepository.sumSoldPrices();
-        return new DashboardDTO(totalSalespersons, totalSold, activeSpreadsheets);
+        long totalSoldActive = productRepository.sumSoldPricesByActiveSpreadsheet();
+        return new DashboardDTO(totalSalespersons, totalSold, totalSoldActive, activeSpreadsheets);
     }
 
     @Transactional(readOnly = true)

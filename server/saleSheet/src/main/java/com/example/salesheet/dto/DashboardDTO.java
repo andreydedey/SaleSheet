@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class DashboardDTO {
     private long totalSalespersons;
     private long totalSold;
+    private long totalSoldActive;
     private long activeSpreadsheets;
 }
