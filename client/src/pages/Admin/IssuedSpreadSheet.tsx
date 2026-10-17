@@ -32,7 +32,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { getSpreadsheet, updateSpreadsheetSalesperson, updateDueDate } from "@/lib/api/spreadsheets"
+import { getSpreadsheet, updateSpreadsheetSalesperson, updateDueDate, updateSpreadsheetName } from "@/lib/api/spreadsheets"
 import { getCountdownInfo, countdownColors, dueDateToDate, dateToDueDate } from "@/lib/utils/spreadsheet"
 import { DatePicker } from "@/components/DatePicker"
 import { DueDateBanner } from "@/components/DueDateBanner"
@@ -42,8 +42,8 @@ import { ProductDialogEditor } from "@/components/ProductDialogEditor"
 import { ObservationPopover } from "@/components/ObservationPopover"
 import { MobileProductCard } from "@/components/MobileProductCard"
 import { FilterPills } from "@/components/FilterPills"
-import { useState } from "react"
-import { CalendarClock, ChevronLeft, UserRound } from "lucide-react"
+import { useState, useRef } from "react"
+import { CalendarClock, ChevronLeft, Pencil, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -52,6 +52,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import type { ProductDTO, ProductPageDTO } from "@/types/product"
 
 type ProductFilter = "ALL" | "SOLD" | "UNSOLD"
@@ -148,6 +156,18 @@ export const IssuedSpreadSheet = () => {
   const [editOpen, setEditOpen] = useState(false)
   const [changingSalesperson, setChangingSalesperson] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<ProductDTO | undefined>()
+  const [renameOpen, setRenameOpen] = useState(false)
+  const renameInputRef = useRef<HTMLInputElement>(null)
+
+  const renameMutation = useMutation({
+    mutationFn: (name: string) => updateSpreadsheetName(spreadsheetId, name),
+    onSuccess: () => {
+      refetchSpreadsheet()
+      toast.success("Planilha renomeada.")
+      setRenameOpen(false)
+    },
+    onError: () => toast.error("Erro ao renomear planilha."),
+  })
 
   const openEdit = (product: ProductDTO) => {
     setEditingProduct(product)
@@ -212,6 +232,9 @@ export const IssuedSpreadSheet = () => {
             <h1 className="text-2xl font-bold">
               Planilha - {spreadsheet?.name}
             </h1>
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => setRenameOpen(true)}>
+              <Pencil className="size-3.5" />
+            </Button>
             {spreadsheet?.status === "ACTIVE" ? (
               <Badge className="bg-green-50 text-green-700">Emitida</Badge>
             ) : (
@@ -552,6 +575,38 @@ export const IssuedSpreadSheet = () => {
         onOpenChange={setEditOpen}
         onSaved={refetchProducts}
       />
+
+      <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Renomear planilha</DialogTitle>
+          </DialogHeader>
+          <Input
+            ref={renameInputRef}
+            defaultValue={spreadsheet?.name}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const value = renameInputRef.current?.value.trim()
+                if (value) renameMutation.mutate(value)
+              }
+            }}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenameOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                const value = renameInputRef.current?.value.trim()
+                if (value) renameMutation.mutate(value)
+              }}
+              disabled={renameMutation.isPending}
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

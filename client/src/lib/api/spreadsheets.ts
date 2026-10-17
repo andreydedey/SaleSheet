@@ -56,6 +56,12 @@ export function updateDueDate(id: number, dueDate: string | null) {
     .then((r) => r.data)
 }
 
+export function updateSpreadsheetName(id: number, name: string) {
+  return api
+    .patch<SpreadSheetDTO>(`/api/spreadsheets/${id}/name`, { name })
+    .then((r) => r.data)
+}
+
 export function updateSpreadsheetSalesperson(id: number, salespersonId: string) {
   return api
     .patch<SpreadSheetDTO>(`/api/spreadsheets/${id}/salesperson`, { salespersonId })
