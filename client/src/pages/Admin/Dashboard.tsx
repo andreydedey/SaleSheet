@@ -80,6 +80,9 @@ export const Dashboard = () => {
     ? (stats?.totalSoldActive ?? 0)
     : (stats?.totalSold ?? 0)
 
+  const personSales = (person: SalespersonDTO) =>
+    soldFilter === "active" ? person.salesActive : person.sales
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
@@ -154,7 +157,7 @@ export const Dashboard = () => {
               <TableRow key={person.id}>
                 <TableCell>{person.name}</TableCell>
                 <TableCell>{person.email}</TableCell>
-                <TableCell className="font-semibold">{formatCents(person.sales)}</TableCell>
+                <TableCell className="font-semibold">{formatCents(personSales(person))}</TableCell>
                 <TableCell>{person.spreadsheetsCount}</TableCell>
                 <TableCell className="flex gap-2 justify-end">
                   <Button
@@ -202,7 +205,7 @@ export const Dashboard = () => {
               <p className="text-xs text-muted-foreground truncate">{person.email}</p>
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs font-semibold text-green-600">
-                  {formatCents(person.sales)}
+                  {formatCents(personSales(person))}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   Planilhas{" "}

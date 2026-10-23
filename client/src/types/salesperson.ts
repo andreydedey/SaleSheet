@@ -3,6 +3,7 @@ export type SalespersonDTO = {
   name: string
   email: string
   sales: number
+  salesActive: number
   spreadsheetsCount: number
 }
 
