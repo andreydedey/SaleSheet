@@ -44,7 +44,7 @@ class DashboardServiceTest {
     @Test
     void listSalespersons_returnsPage() {
         var pageable = PageRequest.of(0, 10);
-        var salesperson = new SalespersonDTO(UUID.randomUUID(), "Ana", "ana@email.com", 50000L, 3);
+        var salesperson = new SalespersonDTO(UUID.randomUUID(), "Ana", "ana@email.com", 50000L, 40000L, 3);
         var page = new PageImpl<>(List.of(salesperson), pageable, 1);
         when(userRepository.findAllSalespersonStats(pageable)).thenReturn(page);
 
