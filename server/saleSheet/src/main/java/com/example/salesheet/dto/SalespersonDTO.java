@@ -14,5 +14,6 @@ public class SalespersonDTO {
     private String name;
     private String email;
     private long sales;
+    private long salesActive;
     private int spreadsheetsCount;
 }

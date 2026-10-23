@@ -27,6 +27,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             SELECT new com.example.salesheet.dto.SalespersonDTO(
                 u.id, u.name, u.email,
                 COALESCE(SUM(CASE WHEN p.sold = true THEN p.price ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN p.sold = true AND s.status = com.example.salesheet.enums.SpreadSheetStatus.ACTIVE THEN p.price ELSE 0 END), 0),
                 CAST(COUNT(DISTINCT s.id) AS int)
             )
             FROM User u
